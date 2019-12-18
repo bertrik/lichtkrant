@@ -47,8 +47,8 @@ static void display_framebuffer(void)
 void led_task(void *params)
 {
     for (;;) {
-        update_framebuffer();
-        display_framebuffer();
+//        update_framebuffer();
+//        display_framebuffer();
     }
 }
 
