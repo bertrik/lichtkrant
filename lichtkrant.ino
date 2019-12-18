@@ -1,14 +1,46 @@
-#include <Arduino.h>
+#include <stdint.h>
 
-#include "editline.h"
 #include "cmdproc.h"
-
+#include "editline.h"
 #include "leddriver.h"
 
+#include <Arduino.h>
+#include <Ticker.h>
+
+#define PIN_LED D4
+
+#define print Serial.printf
+
+static Ticker ticker;
 static char line[120];
+
+static pixel_t framebuffer[LED_NUM_ROWS][LED_NUM_COLS];
+static volatile uint32_t ticks = 0;
+static volatile uint32_t frames = 0;
+
+static int do_tick(int argc, char *argv[])
+{
+    print("Ticks = %d\n", ticks);
+    return 0;
+}
+
+static int do_fps(int argc, char *argv[])
+{
+    print("Measuring ...");
+
+    uint32_t count = frames;
+    delay(1000);
+    int fps = frames - count;
+
+    print("FPS = %d\n", fps);
+
+    return 0;
+}
 
 static int do_help(int argc, char *argv[]);
 const cmd_t commands[] = {
+    { "tick", do_tick, "Show ticks" },
+    { "fps", do_fps, "Show FPS" },
     { "help", do_help, "Show help" },
     { NULL, NULL, NULL }
 };
@@ -16,7 +48,7 @@ const cmd_t commands[] = {
 static void show_help(const cmd_t * cmds)
 {
     for (const cmd_t * cmd = cmds; cmd->cmd != NULL; cmd++) {
-        printf("%10s: %s\n", cmd->name, cmd->help);
+        print("%10s: %s\n", cmd->name, cmd->help);
     }
 }
 
@@ -26,13 +58,38 @@ static int do_help(int argc, char *argv[])
     return 0;
 }
 
+// 1 ms interrupt
+static void tick(void)
+{
+    digitalWrite(PIN_LED, 0);
+
+    led_tick();
+    ticks++;
+
+    digitalWrite(PIN_LED, 1);
+}
+
+// vsync callback
+static void vsync(void)
+{
+    led_write_framebuffer(framebuffer);
+    frames++;
+}
+
 void setup(void)
 {
     Serial.begin(115200);
-    Serial.printf("\nESP32-lichtkrant\n");
+    print("\nESP-lichtkrant\n");
+
+    pinMode(PIN_LED, OUTPUT);
+    digitalWrite(PIN_LED, 1);
+
     EditInit(line, sizeof(line));
 
-    led_clear();
+    memset(framebuffer, 0, sizeof(framebuffer));
+    led_init(vsync);
+
+    ticker.attach_ms(1, tick);
 }
 
 void loop(void)
@@ -48,19 +105,19 @@ void loop(void)
         int result = cmd_process(commands, line);
         switch (result) {
         case CMD_OK:
-            printf("OK\n");
+            print("OK\n");
             break;
         case CMD_NO_CMD:
             break;
         case CMD_UNKNOWN:
-            printf("Unknown command, available commands:\n");
+            print("Unknown command, available commands:\n");
             show_help(commands);
             break;
         default:
-            printf("%d\n", result);
+            print("%d\n", result);
             break;
         }
-        printf(">");
+        print(">");
     }
 }
 
