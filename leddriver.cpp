@@ -13,7 +13,7 @@
 #define PIN_DATA_2  D7
 #define PIN_LATCH   D8
 
-static const frame_fn_t *frame_done_fn;
+static const vsync_fn_t *vsync_fn;
 static pixel_t framebuffer[LED_NUM_ROWS][LED_NUM_COLS];
 static pixel_t pwmstate[LED_NUM_ROWS][LED_NUM_COLS];
 static int row = 0;
@@ -59,7 +59,7 @@ void led_tick(void)
     // signal vsync
     if (row == 7) {
         row = 0;
-        frame_done_fn();
+        vsync_fn();
     }
 }
 
@@ -68,9 +68,10 @@ void led_write_framebuffer(void *data)
     memcpy(framebuffer, data, sizeof(framebuffer));
 }
 
-void led_init(const frame_fn_t * frame_fn)
+void led_init(const vsync_fn_t * vsync)
 {
-    frame_done_fn = frame_fn;
+    // copy
+    vsync_fn = vsync;
 
     pinMode(PIN_LATCH, OUTPUT);
     pinMode(PIN_SHIFT, OUTPUT);

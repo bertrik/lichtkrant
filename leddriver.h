@@ -8,9 +8,9 @@ typedef struct {
     uint8_t g;
 } pixel_t;
 
-typedef void (frame_fn_t) (void);
+typedef void (vsync_fn_t) (void);
 
-void led_init(frame_fn_t * frame_fn);
+void led_init(vsync_fn_t * vsync);
 
 void led_tick(void);
 
