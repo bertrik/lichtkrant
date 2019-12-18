@@ -37,10 +37,57 @@ static int do_fps(int argc, char *argv[])
     return 0;
 }
 
+static void fill(pixel_t c)
+{
+    for (int y = 0; y < LED_NUM_ROWS; y++) {
+        for (int x = 0; x < LED_NUM_COLS; x++) {
+            framebuffer[y][x] = c;
+        }
+    }
+}
+
+static int do_pat(int argc, char *argv[])
+{
+    if (argc < 2) {
+        return -1;
+    }
+    int pat = atoi(argv[1]);
+
+    pixel_t c;
+    switch (pat) {
+    case 0:
+        print("All clear\n");
+        c = { 0, 0 };
+        fill(c);
+        break;
+    case 1:
+        print("All red\n");
+        c = { 255, 0 };
+        fill(c);
+        break;
+    case 2:
+        print("All green\n");
+        c = { 0, 255 };
+        fill(c);
+        break;
+    case 3:
+        print("All yellow\n");
+        c = { 255, 255 };
+        fill(c);
+        break;
+    default:
+        print("Unhandled pattern %d\n", pat);
+        return -1;
+    }
+
+    return CMD_OK;
+}
+
 static int do_help(int argc, char *argv[]);
 const cmd_t commands[] = {
     { "tick", do_tick, "Show ticks" },
     { "fps", do_fps, "Show FPS" },
+    { "pat", do_pat, "[pattern] display a specific pattern" },
     { "help", do_help, "Show help" },
     { NULL, NULL, NULL }
 };
@@ -120,5 +167,3 @@ void loop(void)
         print(">");
     }
 }
-
-
