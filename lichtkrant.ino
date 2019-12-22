@@ -119,6 +119,11 @@ static int do_line(int argc, char *argv[])
     }
 
     int line = atoi(argv[1]);
+    if ((line < 0) || (line >= 7)) {
+        print("Invalid line %d\n", line);
+        return -2;
+    }
+
     memset(framebuffer, 0, sizeof(framebuffer));
     pixel_t c = { 255, 0 };
     for (int x = 0; x < 80; x++) {
