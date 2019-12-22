@@ -12,8 +12,6 @@ typedef void (vsync_fn_t) (void);
 
 void led_init(vsync_fn_t * vsync);
 
-void led_tick(void);
-
 void led_write_framebuffer(const void *data);
 
 

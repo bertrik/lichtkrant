@@ -13,14 +13,7 @@
 static char line[120];
 
 static pixel_t framebuffer[LED_NUM_ROWS][LED_NUM_COLS];
-static volatile uint32_t ticks = 0;
 static volatile uint32_t frames = 0;
-
-static int do_tick(int argc, char *argv[])
-{
-    print("Ticks = %d\n", ticks);
-    return CMD_OK;
-}
 
 static int do_fps(int argc, char *argv[])
 {
@@ -133,7 +126,6 @@ static int do_line(int argc, char *argv[])
 
 static int do_help(int argc, char *argv[]);
 const cmd_t commands[] = {
-    { "tick", do_tick, "Show ticks" },
     { "fps", do_fps, "Show FPS" },
     { "pat", do_pat, "[pattern] display a specific pattern" },
     { "line", do_line, "<line> fill one line" },
@@ -152,17 +144,6 @@ static int do_help(int argc, char *argv[])
 {
     show_help(commands);
     return CMD_OK;
-}
-
-// 1 ms interrupt
-static void tick(void)
-{
-    digitalWrite(PIN_LED, 0);
-
-    led_tick();
-    ticks++;
-
-    digitalWrite(PIN_LED, 1);
 }
 
 // vsync callback

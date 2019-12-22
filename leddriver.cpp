@@ -21,7 +21,7 @@ static pixel_t framebuffer[LED_NUM_ROWS][LED_NUM_COLS];
 static pixel_t pwmstate[LED_NUM_ROWS][LED_NUM_COLS];
 static int row = 0;
 
-void led_tick(void)
+static void ICACHE_RAM_ATTR led_tick(void)
 {
     // latch the data
     digitalWrite(PIN_LATCH, 1);
@@ -36,8 +36,7 @@ void led_tick(void)
 
     // write column data
     row = (row + 1) & 7;
-    if (row == 0) {
-        row = 0;
+    if (row == 7) {
         vsync_fn();
     } else {
         // write the column shift registers
@@ -96,5 +95,7 @@ void led_init(const vsync_fn_t * vsync)
     row = 0;
 
     // install the interrupt routine
-    ticker.attach_ms(1, tick);
+    ticker.attach_ms(1, led_tick);
 }
+
+
