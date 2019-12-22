@@ -20,6 +20,9 @@ static int row = 0;
 
 void led_tick(void)
 {
+    // latch the data
+    digitalWrite(PIN_LATCH, 1);
+
     // set the row multiplexer
     digitalWrite(PIN_MUX_0, row & 1);
     digitalWrite(PIN_MUX_1, row & 2);
@@ -29,7 +32,11 @@ void led_tick(void)
     digitalWrite(PIN_LATCH, 0);
 
     // write column data
-    if (row < 8) {
+    row = (row + 1) & 7;
+    if (row == 0) {
+        row = 0;
+        vsync_fn();
+    } else {
         // write the column shift registers
         pixel_t *pwmrow = pwmstate[row];
         pixel_t *fb_row = framebuffer[row];
@@ -51,13 +58,7 @@ void led_tick(void)
             // shift
             digitalWrite(PIN_SHIFT, 1);
         }
-    } else {
-        row = 0;
-        vsync_fn();
     }
-    row++;
-
-    digitalWrite(PIN_LATCH, 1);
 }
 
 void led_write_framebuffer(const void *data)
