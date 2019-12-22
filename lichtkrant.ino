@@ -75,9 +75,36 @@ static int do_pat(int argc, char *argv[])
         c = { 255, 255 };
         fill(c);
         break;
+    case 4:
+        print("quattro stagioni\n");
+        for (int x = 0; x < 80; x++) {
+            for (int y = 0; y < 7; y++) {
+                pixel_t c;
+                c.r = (x < 40) ? 0 : 255;
+                c.g = (y < 4) ? 0 : 255;
+                framebuffer[y][x] = c;
+            }
+        }
+        break;
     default:
         print("Unhandled pattern %d\n", pat);
         return -1;
+    }
+
+    return CMD_OK;
+}
+
+static int do_line(int argc, char *argv[])
+{
+    if (argc < 2) {
+        return -1;
+    }
+
+    int line = atoi(argv[1]);
+    memset(framebuffer, 0, sizeof(framebuffer));
+    pixel_t c = { 255, 0 };
+    for (int x = 0; x < 80; x++) {
+        framebuffer[line][x] = c;
     }
 
     return CMD_OK;
@@ -88,6 +115,7 @@ const cmd_t commands[] = {
     { "tick", do_tick, "Show ticks" },
     { "fps", do_fps, "Show FPS" },
     { "pat", do_pat, "[pattern] display a specific pattern" },
+    { "line", do_line, "<line> fill one line" },
     { "help", do_help, "Show help" },
     { NULL, NULL, NULL }
 };
@@ -133,7 +161,13 @@ void setup(void)
 
     EditInit(line, sizeof(line));
 
-    memset(framebuffer, 0, sizeof(framebuffer));
+    for (int x = 0; x < 80; x++) {
+        for (int y = 0; y < 7; y++) {
+            framebuffer[y][x].r = map(y, 0, 7, 255, 0);
+            framebuffer[y][x].g = map(y, 0, 7, 0, 255);
+        }
+    }
+
     led_init(vsync);
 
     ticker.attach_ms(1, tick);

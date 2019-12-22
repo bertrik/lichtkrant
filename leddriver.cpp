@@ -4,14 +4,14 @@
 
 #include "leddriver.h"
 
-#define PIN_MUX_0   D1
-#define PIN_MUX_1   D2
-#define PIN_MUX_2   D3
+#define PIN_MUX_0   D3      // J1.11
+#define PIN_MUX_1   D2      // J1.13
+#define PIN_MUX_2   D1      // J1.15
 
-#define PIN_SHIFT   D5
-#define PIN_DATA_1  D6
-#define PIN_DATA_2  D7
-#define PIN_LATCH   D8
+#define PIN_SHIFT   D5      // J1.1
+#define PIN_LATCH   D6      // J1.3
+#define PIN_DATA_G  D7      // J1.5
+#define PIN_DATA_R  D8      // J1.7
 
 static const vsync_fn_t *vsync_fn;
 static pixel_t framebuffer[LED_NUM_ROWS][LED_NUM_COLS];
@@ -20,47 +20,44 @@ static int row = 0;
 
 void led_tick(void)
 {
-    // latch the columns of the previous row
-    digitalWrite(PIN_LATCH, 1);
-
-    // set the row multiplexer of the previous row
+    // set the row multiplexer
     digitalWrite(PIN_MUX_0, row & 1);
     digitalWrite(PIN_MUX_1, row & 2);
     digitalWrite(PIN_MUX_2, row & 4);
 
-    // deactivate latch
+    // prepare to latch the columns
     digitalWrite(PIN_LATCH, 0);
 
-    // next row
-    row++;
+    // write column data
+    if (row < 8) {
+        // write the column shift registers
+        pixel_t *pwmrow = pwmstate[row];
+        pixel_t *fb_row = framebuffer[row];
+        for (int col = 0; col < LED_NUM_COLS; col++) {
+            // dither
+            pixel_t c1 = pwmrow[col];
+            pixel_t c2 = fb_row[col];
+            int r = c1.r + c2.r;
+            int g = c1.g + c2.g;
 
-    // write the column shift registers
-    pixel_t *pwmrow = pwmstate[row];
-    pixel_t *fb_row = framebuffer[row];
-    for (int col = 0; col < LED_NUM_COLS; col++) {
-        // dither
-        pixel_t c1 = pwmrow[col];
-        pixel_t c2 = fb_row[col];
-        int r = c1.r + c2.r;
-        int g = c1.g + c2.g;
+            digitalWrite(PIN_SHIFT, 0);
+            digitalWrite(PIN_DATA_G, g < 256);
+            digitalWrite(PIN_DATA_R, r < 256);
 
-        digitalWrite(PIN_SHIFT, 0);
-        digitalWrite(PIN_DATA_1, r & 256);
-        digitalWrite(PIN_DATA_2, g & 256);
+            // write back
+            pwmrow[col].r = r;
+            pwmrow[col].g = g;
 
-        // write back
-        pwmrow[col].r = r;
-        pwmrow[col].g = g;
-
-        // shift
-        digitalWrite(PIN_SHIFT, 1);
-    }
-
-    // signal vsync
-    if (row == 7) {
+            // shift
+            digitalWrite(PIN_SHIFT, 1);
+        }
+    } else {
         row = 0;
         vsync_fn();
     }
+    row++;
+
+    digitalWrite(PIN_LATCH, 1);
 }
 
 void led_write_framebuffer(const void *data)
@@ -75,8 +72,8 @@ void led_init(const vsync_fn_t * vsync)
 
     pinMode(PIN_LATCH, OUTPUT);
     pinMode(PIN_SHIFT, OUTPUT);
-    pinMode(PIN_DATA_1, OUTPUT);
-    pinMode(PIN_DATA_2, OUTPUT);
+    pinMode(PIN_DATA_R, OUTPUT);
+    pinMode(PIN_DATA_G, OUTPUT);
     pinMode(PIN_MUX_0, OUTPUT);
     pinMode(PIN_MUX_1, OUTPUT);
     pinMode(PIN_MUX_2, OUTPUT);
