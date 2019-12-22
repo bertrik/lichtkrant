@@ -21,7 +21,7 @@ static volatile uint32_t frames = 0;
 static int do_tick(int argc, char *argv[])
 {
     print("Ticks = %d\n", ticks);
-    return 0;
+    return CMD_OK;
 }
 
 static int do_fps(int argc, char *argv[])
@@ -34,7 +34,7 @@ static int do_fps(int argc, char *argv[])
 
     print("FPS = %d\n", fps);
 
-    return 0;
+    return CMD_OK;
 }
 
 static void fill(pixel_t c)
@@ -102,7 +102,7 @@ static void show_help(const cmd_t * cmds)
 static int do_help(int argc, char *argv[])
 {
     show_help(commands);
-    return 0;
+    return CMD_OK;
 }
 
 // 1 ms interrupt

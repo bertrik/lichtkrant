@@ -63,7 +63,7 @@ void led_tick(void)
     }
 }
 
-void led_write_framebuffer(void *data)
+void led_write_framebuffer(const void *data)
 {
     memcpy(framebuffer, data, sizeof(framebuffer));
 }
