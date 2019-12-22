@@ -86,6 +86,24 @@ static int do_pat(int argc, char *argv[])
             }
         }
         break;
+    case 5:
+        print("rasta vertical\n");
+        for (int x = 0; x < 80; x++) {
+            for (int y = 0; y < 7; y++) {
+                framebuffer[y][x].r = map(y, 0, 7, 255, 0);
+                framebuffer[y][x].g = map(y, 0, 7, 0, 255);
+            }
+        }
+        break;
+    case 6:
+        print("rasta horizontal\n");
+        for (int x = 0; x < 80; x++) {
+            for (int y = 0; y < 7; y++) {
+                framebuffer[y][x].r = map(x, 0, 80, 255, 0);
+                framebuffer[y][x].g = map(x, 0, 80, 0, 255);
+            }
+        }
+        break;
     default:
         print("Unhandled pattern %d\n", pat);
         return -1;
