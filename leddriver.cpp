@@ -1,18 +1,21 @@
 #include <string.h>
 
 #include <Arduino.h>
+#include <Ticker.h>
 
 #include "leddriver.h"
 
-#define PIN_MUX_2   D1      // J1.15
-#define PIN_MUX_1   D2      // J1.13
-#define PIN_MUX_0   D3      // J1.11
 
-#define PIN_DATA_R  D5      // J1.7
-#define PIN_DATA_G  D6      // J1.5
-#define PIN_LATCH   D7      // J1.3
-#define PIN_SHIFT   D8      // J1.1
+#define PIN_MUX_2   D1          // J1.15
+#define PIN_MUX_1   D2          // J1.13
+#define PIN_MUX_0   D3          // J1.11
 
+#define PIN_DATA_R  D5          // J1.7
+#define PIN_DATA_G  D6          // J1.5
+#define PIN_LATCH   D7          // J1.3
+#define PIN_SHIFT   D8          // J1.1
+
+static Ticker ticker;
 static const vsync_fn_t *vsync_fn;
 static pixel_t framebuffer[LED_NUM_ROWS][LED_NUM_COLS];
 static pixel_t pwmstate[LED_NUM_ROWS][LED_NUM_COLS];
@@ -91,6 +94,7 @@ void led_init(const vsync_fn_t * vsync)
     }
 
     row = 0;
+
+    // install the interrupt routine
+    ticker.attach_ms(1, tick);
 }
-
-

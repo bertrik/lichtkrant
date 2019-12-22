@@ -5,13 +5,11 @@
 #include "leddriver.h"
 
 #include <Arduino.h>
-#include <Ticker.h>
 
 #define PIN_LED D4
 
 #define print Serial.printf
 
-static Ticker ticker;
 static char line[120];
 
 static pixel_t framebuffer[LED_NUM_ROWS][LED_NUM_COLS];
@@ -192,8 +190,6 @@ void setup(void)
     }
 
     led_init(vsync);
-
-    ticker.attach_ms(1, tick);
 }
 
 void loop(void)
