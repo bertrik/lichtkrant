@@ -50,8 +50,13 @@ static void ICACHE_RAM_ATTR led_tick(void)
             int g = c1.g + c2.g;
 
             digitalWrite(PIN_SHIFT, 0);
-            digitalWrite(PIN_DATA_G, g < 256);
+#if 1
             digitalWrite(PIN_DATA_R, r < 256);
+            digitalWrite(PIN_DATA_G, g < 256);
+#else
+            digitalWrite(PIN_DATA_R, c2.r < 128);
+            digitalWrite(PIN_DATA_G, c2.g < 128);
+#endif
 
             // write back
             pwmrow[col].r = r;
