@@ -101,7 +101,7 @@ void led_init(const vsync_fn_t * vsync)
     // initialise the pwm state with random values
     for (int row = 0; row < LED_NUM_ROWS; row++) {
         for (int col = 0; col < LED_NUM_COLS; col++) {
-#if 1   // ordered dither
+#if 0   // ordered dither
             pwmstate[row][col].r = reverse((row + col) << 3);
             pwmstate[row][col].g = reverse((row - col) << 3);
 #else   // random dither
