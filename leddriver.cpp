@@ -1,7 +1,6 @@
 #include <string.h>
 
 #include <Arduino.h>
-#include <Ticker.h>
 
 #include "leddriver.h"
 
@@ -15,7 +14,6 @@
 #define PIN_LATCH   D7          // J1.3
 #define PIN_SHIFT   D8          // J1.1
 
-static Ticker ticker;
 static const vsync_fn_t *vsync_fn;
 static pixel_t framebuffer[LED_NUM_ROWS][LED_NUM_COLS];
 static pixel_t pwmstate[LED_NUM_ROWS][LED_NUM_COLS];
@@ -51,13 +49,8 @@ static void ICACHE_RAM_ATTR led_tick(void)
             int g = c1.g + c2.g;
 
             digitalWrite(PIN_SHIFT, 0);
-#if 1
             digitalWrite(PIN_DATA_R, r < 256);
             digitalWrite(PIN_DATA_G, g < 256);
-#else
-            digitalWrite(PIN_DATA_R, c2.r < 128);
-            digitalWrite(PIN_DATA_G, c2.g < 128);
-#endif
 
             // write back
             pwmrow[col].r = r;
@@ -119,8 +112,12 @@ void led_init(const vsync_fn_t * vsync)
 
 void led_enable(void)
 {
-    // install the interrupt routine
-    ticker.attach_ms(1, led_tick);
+    // set up timer interrupt
+    timer1_isr_init();
+    timer1_disable();
+    timer1_write(1250); // fps = 625000/number
+    timer1_attachInterrupt(led_tick);
+    timer1_enable(TIM_DIV16, TIM_EDGE, TIM_LOOP);
 
     // enable pin
     digitalWrite(PIN_ENABLE, 1);
@@ -128,11 +125,11 @@ void led_enable(void)
 
 void led_disable(void)
 {
-    // detach the interrupt routine
-    ticker.detach();
-
     // enable pin
     digitalWrite(PIN_ENABLE, 0);
+
+    // detach the interrupt routine
+    timer1_disable();
 }
 
 
