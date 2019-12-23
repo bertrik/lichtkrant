@@ -150,12 +150,19 @@ static int do_pix(int argc, char *argv[])
     return CMD_OK;
 }
 
+static int do_reboot(int argc, char *argv[])
+{
+    ESP.restart();
+    return CMD_OK;
+}
+
 static int do_help(int argc, char *argv[]);
 const cmd_t commands[] = {
     { "fps", do_fps, "Show FPS" },
     { "pat", do_pat, "[pattern] display a specific pattern" },
     { "line", do_line, "<line> [r] [g] fill one row colour {r.g}" },
     { "pix", do_pix, "<col> <row> [r] [g] Set pixel with colour {r.g}" },
+    { "reboot", do_reboot, "Reboot" },
     { "help", do_help, "Show help" },
     { NULL, NULL, NULL }
 };
