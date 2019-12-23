@@ -124,11 +124,33 @@ static int do_line(int argc, char *argv[])
     return CMD_OK;
 }
 
+static int do_pix(int argc, char *argv[])
+{
+    if (argc < 3) {
+        return -1;
+    }
+    int x = atoi(argv[1]);
+    int y = atoi(argv[2]);
+    int r = 255;
+    if (argc > 3) {
+        r = atoi(argv[3]);
+    }
+    int g = 255;
+    if (argc > 4) {
+        g = atoi(argv[4]);
+    }
+    pixel_t c = {r, g};
+    framebuffer[y][x] = c;
+
+    return CMD_OK;
+}
+
 static int do_help(int argc, char *argv[]);
 const cmd_t commands[] = {
     { "fps", do_fps, "Show FPS" },
     { "pat", do_pat, "[pattern] display a specific pattern" },
     { "line", do_line, "<line> fill one line" },
+    { "pix", do_pix, "<col> <row> [r] [g] Set pixel with {r.g}" },
     { "help", do_help, "Show help" },
     { NULL, NULL, NULL }
 };
