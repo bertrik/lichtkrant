@@ -104,6 +104,15 @@ static int do_pat(int argc, char *argv[])
             }
         }
         break;
+    case 8:
+        print("green shades\n");
+        for (int x = 0; x < 80; x++) {
+            for (int y = 0; y < 7; y++) {
+                framebuffer[y][x].r = 0;
+                framebuffer[y][x].g = map(x, 0, 79, 255, 0);
+            }
+        }
+        break;
     default:
         print("Unhandled pattern %d\n", pat);
         return -1;
