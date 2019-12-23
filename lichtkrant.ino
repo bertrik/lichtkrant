@@ -175,6 +175,7 @@ static int do_enable(int argc, char *argv[])
 
 static int do_reboot(int argc, char *argv[])
 {
+    led_disable();
     ESP.restart();
     return CMD_OK;
 }
