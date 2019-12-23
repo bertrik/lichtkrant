@@ -73,6 +73,14 @@ void led_write_framebuffer(const void *data)
     memcpy(framebuffer, data, sizeof(framebuffer));
 }
 
+static uint8_t reverse(uint8_t b)
+{
+   b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+   b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+   b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+   return b;
+}
+
 void led_init(const vsync_fn_t * vsync)
 {
     // copy
@@ -93,8 +101,8 @@ void led_init(const vsync_fn_t * vsync)
     for (int row = 0; row < LED_NUM_ROWS; row++) {
         for (int col = 0; col < LED_NUM_COLS; col++) {
 #if 1   // ordered dither
-            pwmstate[row][col].r = (row + col) << 3;
-            pwmstate[row][col].g = (row - col) << 3;
+            pwmstate[row][col].r = reverse((row + col) << 3);
+            pwmstate[row][col].g = reverse((row - col) << 3);
 #else   // random dither
             pwmstate[row][col].r = random(256);
             pwmstate[row][col].g = random(256);
