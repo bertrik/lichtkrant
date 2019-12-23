@@ -159,6 +159,20 @@ static int do_pix(int argc, char *argv[])
     return CMD_OK;
 }
 
+static int do_enable(int argc, char *argv[])
+{
+    bool enable = true;
+    if (argc > 1) {
+       enable = atoi(argv[1]) != 0;
+    }
+    if (enable) {
+        led_enable();
+    } else {
+        led_disable();
+    }
+    return CMD_OK;
+}
+
 static int do_reboot(int argc, char *argv[])
 {
     ESP.restart();
@@ -171,6 +185,7 @@ const cmd_t commands[] = {
     { "pat", do_pat, "[pattern] display a specific pattern" },
     { "line", do_line, "<line> [r] [g] fill one row colour {r.g}" },
     { "pix", do_pix, "<col> <row> [r] [g] Set pixel with colour {r.g}" },
+    { "enable", do_enable, "[0|1] Enable/disable" },
     { "reboot", do_reboot, "Reboot" },
     { "help", do_help, "Show help" },
     { NULL, NULL, NULL }
@@ -214,6 +229,7 @@ void setup(void)
     }
 
     led_init(vsync);
+    led_enable();
 }
 
 void loop(void)

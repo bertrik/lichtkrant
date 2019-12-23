@@ -9,7 +9,7 @@
 #define PIN_MUX_2   D1          // J1.15
 #define PIN_MUX_1   D2          // J1.13
 #define PIN_MUX_0   D3          // J1.11
-
+#define PIN_ENABLE  D4          // J1.9
 #define PIN_DATA_R  D5          // J1.7
 #define PIN_DATA_G  D6          // J1.5
 #define PIN_LATCH   D7          // J1.3
@@ -87,6 +87,8 @@ void led_init(const vsync_fn_t * vsync)
     // copy
     vsync_fn = vsync;
 
+    pinMode(PIN_ENABLE, OUTPUT);
+    digitalWrite(PIN_ENABLE, 0);
     pinMode(PIN_LATCH, OUTPUT);
     pinMode(PIN_SHIFT, OUTPUT);
     pinMode(PIN_DATA_R, OUTPUT);
@@ -113,8 +115,24 @@ void led_init(const vsync_fn_t * vsync)
 
     row = 0;
 
+}
+
+void led_enable(void)
+{
     // install the interrupt routine
     ticker.attach_ms(1, led_tick);
+
+    // enable pin
+    digitalWrite(PIN_ENABLE, 1);
+}
+
+void led_disable(void)
+{
+    // detach the interrupt routine
+    ticker.detach();
+
+    // enable pin
+    digitalWrite(PIN_ENABLE, 0);
 }
 
 
