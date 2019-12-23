@@ -8,7 +8,7 @@ typedef struct {
     uint8_t g;
 } pixel_t;
 
-typedef void (vsync_fn_t) (void);
+typedef void (vsync_fn_t) (int frame_nr);
 
 void led_init(vsync_fn_t * vsync);
 

@@ -181,10 +181,10 @@ static int do_help(int argc, char *argv[])
 }
 
 // vsync callback
-static void ICACHE_RAM_ATTR vsync(void)
+static void ICACHE_RAM_ATTR vsync(int frame_nr)
 {
     led_write_framebuffer(framebuffer);
-    frames++;
+    frames = frame_nr;
 }
 
 void setup(void)

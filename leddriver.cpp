@@ -20,6 +20,7 @@ static const vsync_fn_t *vsync_fn;
 static pixel_t framebuffer[LED_NUM_ROWS][LED_NUM_COLS];
 static pixel_t pwmstate[LED_NUM_ROWS][LED_NUM_COLS];
 static int row = 0;
+static int frame = 0;
 
 static void ICACHE_RAM_ATTR led_tick(void)
 {
@@ -37,7 +38,7 @@ static void ICACHE_RAM_ATTR led_tick(void)
     // write column data
     row = (row + 1) & 7;
     if (row == 7) {
-        vsync_fn();
+        vsync_fn(frame++);
     } else {
         // write the column shift registers
         pixel_t *pwmrow = pwmstate[row];
