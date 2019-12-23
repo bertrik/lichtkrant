@@ -81,8 +81,8 @@ static int do_pat(int argc, char *argv[])
         print("rasta vertical\n");
         for (int x = 0; x < 80; x++) {
             for (int y = 0; y < 7; y++) {
-                framebuffer[y][x].r = map(y, 0, 7, 255, 0);
-                framebuffer[y][x].g = map(y, 0, 7, 0, 255);
+                framebuffer[y][x].r = map(y, 0, 6, 255, 0);
+                framebuffer[y][x].g = map(y, 0, 6, 0, 255);
             }
         }
         break;
@@ -90,8 +90,8 @@ static int do_pat(int argc, char *argv[])
         print("rasta horizontal\n");
         for (int x = 0; x < 80; x++) {
             for (int y = 0; y < 7; y++) {
-                framebuffer[y][x].r = map(x, 0, 80, 255, 0);
-                framebuffer[y][x].g = map(x, 0, 80, 0, 255);
+                framebuffer[y][x].r = map(x, 0, 79, 255, 0);
+                framebuffer[y][x].g = map(x, 0, 79, 0, 255);
             }
         }
         break;
@@ -108,15 +108,20 @@ static int do_line(int argc, char *argv[])
     if (argc < 2) {
         return -1;
     }
-
     int line = atoi(argv[1]);
     if ((line < 0) || (line >= 7)) {
         print("Invalid line %d\n", line);
         return -2;
     }
-
-    memset(framebuffer, 0, sizeof(framebuffer));
-    pixel_t c = { 255, 0 };
+    uint8_t r = 255;
+    if (argc > 2) {
+        r = atoi(argv[2]);
+    }
+    uint8_t g = 255;
+    if (argc > 3) {
+        g = atoi(argv[3]);
+    }
+    pixel_t c = {r, g};
     for (int x = 0; x < 80; x++) {
         framebuffer[line][x] = c;
     }
@@ -131,11 +136,11 @@ static int do_pix(int argc, char *argv[])
     }
     int x = atoi(argv[1]);
     int y = atoi(argv[2]);
-    int r = 255;
+    uint8_t r = 255;
     if (argc > 3) {
         r = atoi(argv[3]);
     }
-    int g = 255;
+    uint8_t g = 255;
     if (argc > 4) {
         g = atoi(argv[4]);
     }
@@ -149,8 +154,8 @@ static int do_help(int argc, char *argv[]);
 const cmd_t commands[] = {
     { "fps", do_fps, "Show FPS" },
     { "pat", do_pat, "[pattern] display a specific pattern" },
-    { "line", do_line, "<line> fill one line" },
-    { "pix", do_pix, "<col> <row> [r] [g] Set pixel with {r.g}" },
+    { "line", do_line, "<line> [r] [g] fill one row colour {r.g}" },
+    { "pix", do_pix, "<col> <row> [r] [g] Set pixel with colour {r.g}" },
     { "help", do_help, "Show help" },
     { NULL, NULL, NULL }
 };
@@ -187,8 +192,8 @@ void setup(void)
 
     for (int x = 0; x < 80; x++) {
         for (int y = 0; y < 7; y++) {
-            framebuffer[y][x].r = map(y, 0, 7, 255, 0);
-            framebuffer[y][x].g = map(y, 0, 7, 0, 255);
+            framebuffer[y][x].r = map(x, 0, 79, 255, 0);
+            framebuffer[y][x].g = map(x, 0, 79, 0, 255);
         }
     }
 
