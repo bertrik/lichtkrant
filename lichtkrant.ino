@@ -71,7 +71,7 @@ static int do_pat(int argc, char *argv[])
         for (int x = 0; x < 80; x++) {
             for (int y = 0; y < 7; y++) {
                 pixel_t c;
-                c.r = (x < 40) ? 0 : 255;
+                c.r = (x < 40) || (y == 3) ? 0 : 255;
                 c.g = (y < 4) ? 0 : 255;
                 framebuffer[y][x] = c;
             }
