@@ -130,6 +130,11 @@ void led_disable(void)
 
     // detach the interrupt routine
     timer1_disable();
+
+    // flush shift register
+    row = 0;
+    memset(framebuffer, 0, sizeof(framebuffer));
+    led_tick();
 }
 
 
