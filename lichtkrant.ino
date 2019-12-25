@@ -8,8 +8,6 @@
 #include <WiFiManager.h>
 #include <Arduino.h>
 
-#define PIN_LED D4
-
 #define print Serial.printf
 
 static char line[120];
@@ -141,7 +139,7 @@ static int do_line(int argc, char *argv[])
     if (argc > 3) {
         g = atoi(argv[3]);
     }
-    pixel_t c = {r, g};
+    pixel_t c = { r, g };
     for (int x = 0; x < 80; x++) {
         framebuffer[line][x] = c;
     }
@@ -164,7 +162,7 @@ static int do_pix(int argc, char *argv[])
     if (argc > 4) {
         g = atoi(argv[4]);
     }
-    pixel_t c = {r, g};
+    pixel_t c = { r, g };
     framebuffer[y][x] = c;
 
     return CMD_OK;
@@ -174,7 +172,7 @@ static int do_enable(int argc, char *argv[])
 {
     bool enable = true;
     if (argc > 1) {
-       enable = atoi(argv[1]) != 0;
+        enable = atoi(argv[1]) != 0;
     }
     if (enable) {
         led_enable();
@@ -227,9 +225,6 @@ void setup(void)
 {
     Serial.begin(115200);
     print("\nESP-lichtkrant\n");
-
-    pinMode(PIN_LED, OUTPUT);
-    digitalWrite(PIN_LED, 1);
 
     EditInit(line, sizeof(line));
 
