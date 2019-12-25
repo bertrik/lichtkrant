@@ -7,7 +7,7 @@ static const cmd_t *find_cmd(const cmd_t * commands, const char *name)
 {
     const cmd_t *cmd;
     for (cmd = commands; cmd->cmd != NULL; cmd++) {
-        if (strcmp(name, cmd->name) == 0) {
+        if (strcasecmp(name, cmd->name) == 0) {
             return cmd;
         }
     }
