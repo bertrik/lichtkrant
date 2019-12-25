@@ -4,6 +4,8 @@
 #include "editline.h"
 #include "leddriver.h"
 
+#include <ESP8266WiFi.h>
+#include <WiFiManager.h>
 #include <Arduino.h>
 
 #define PIN_LED D4
