@@ -149,7 +149,7 @@ static int do_line(int argc, char *argv[])
 
 static int do_pix(int argc, char *argv[])
 {
-    if (argc < 3) {
+    if (argc < 4) {
         return CMD_ARG;
     }
     int x = atoi(argv[1]);
@@ -160,16 +160,12 @@ static int do_pix(int argc, char *argv[])
     if ((y < 0) || (y >= LED_NUM_ROWS)) {
         return CMD_ARG;
     }
-    uint8_t r = 255;
-    if (argc > 3) {
-        r = atoi(argv[3]);
-    }
-    uint8_t g = 255;
-    if (argc > 4) {
-        g = atoi(argv[4]);
-    }
-    pixel_t c = { r, g };
-    framebuffer[y][x] = c;
+    uint32_t c = strtoul(argv[3], NULL, 16);
+
+    pixel_t p;
+    p.r = (c >> 16) & 0xFF;
+    p.g = (c >> 8) & 0xFF;
+    framebuffer[y][x] = p;
 
     return CMD_OK;
 }
@@ -200,7 +196,7 @@ const cmd_t commands[] = {
     { "fps", do_fps, "Show FPS" },
     { "pat", do_pat, "[pattern] display a specific pattern" },
     { "line", do_line, "<line> [r] [g] fill one row colour {r.g}" },
-    { "pix", do_pix, "<col> <row> [r] [g] Set pixel with colour {r.g}" },
+    { "pix", do_pix, "<col> <row> <hexcode> Set pixel with colour" },
     { "enable", do_enable, "[0|1] Enable/disable" },
     { "reboot", do_reboot, "Reboot" },
     { "help", do_help, "Show help" },
