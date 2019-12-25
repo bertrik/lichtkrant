@@ -153,7 +153,13 @@ static int do_pix(int argc, char *argv[])
         return CMD_ARG;
     }
     int x = atoi(argv[1]);
+    if ((x < 0) || (x >= LED_NUM_COLS)) {
+        return CMD_ARG;
+    }
     int y = atoi(argv[2]);
+    if ((y < 0) || (y >= LED_NUM_ROWS)) {
+        return CMD_ARG;
+    }
     uint8_t r = 255;
     if (argc > 3) {
         r = atoi(argv[3]);
