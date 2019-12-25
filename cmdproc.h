@@ -5,6 +5,7 @@
 #define CMD_OK      0
 #define CMD_NO_CMD  -0x7F00
 #define CMD_UNKNOWN -0x7F01
+#define CMD_ARG     -0x7F02
 
 typedef int (cmd_fn)(int argc, char *argv[]);
 

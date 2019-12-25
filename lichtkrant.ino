@@ -40,7 +40,7 @@ static void fill(pixel_t c)
 static int do_pat(int argc, char *argv[])
 {
     if (argc < 2) {
-        return -1;
+        return CMD_ARG;
     }
     int pat = atoi(argv[1]);
 
@@ -115,7 +115,7 @@ static int do_pat(int argc, char *argv[])
         break;
     default:
         print("Unhandled pattern %d\n", pat);
-        return -1;
+        return CMD_ARG;
     }
 
     return CMD_OK;
@@ -124,7 +124,7 @@ static int do_pat(int argc, char *argv[])
 static int do_line(int argc, char *argv[])
 {
     if (argc < 2) {
-        return -1;
+        return CMD_ARG;
     }
     int line = atoi(argv[1]);
     if ((line < 0) || (line >= 7)) {
@@ -150,7 +150,7 @@ static int do_line(int argc, char *argv[])
 static int do_pix(int argc, char *argv[])
 {
     if (argc < 3) {
-        return -1;
+        return CMD_ARG;
     }
     int x = atoi(argv[1]);
     int y = atoi(argv[2]);
@@ -259,6 +259,9 @@ void loop(void)
         case CMD_UNKNOWN:
             print("Unknown command, available commands:\n");
             show_help(commands);
+            break;
+        case CMD_ARG:
+            print("Invalid argument(s)\n");
             break;
         default:
             print("%d\n", result);
