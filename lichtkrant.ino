@@ -5,6 +5,8 @@
 #include "leddriver.h"
 #include "draw.h"
 
+#include "glcdfont.h"
+
 #include <ESP8266WiFi.h>
 #include <WiFiManager.h>
 #include <Arduino.h>
@@ -179,6 +181,67 @@ static int do_pix(int argc, char *argv[])
     return CMD_OK;
 }
 
+static void draw_pixel(int x, int y, pixel_t c)
+{
+    if ((x < 0) || (x > 79) || (y < 0) || (y > 7)) {
+        return;
+    }
+    framebuffer[y][x] = c;
+}
+
+static int draw_glyph(char c, int x, pixel_t fg, pixel_t bg)
+{
+    // ASCII?
+    if (c > 127) {
+        return x;
+    }
+    // draw glyph
+    int aa = 0;
+    for (int col = 0; col < 5; col++) {
+        uint8_t a = font[c * 5 + col];
+
+        // skip repeating space
+        if ((aa == 0) && (a == 0)) {
+            continue;
+        }
+        aa = a;
+
+        // draw column
+        for (int y = 0; y < 7; y++) {
+            draw_pixel(x, y, (a & 1) ? fg : bg);
+            a >>= 1;
+        }
+        x++;
+    }
+
+    // draw space until next character
+    if (aa != 0) {
+        for (int y = 0; y < 7; y++) {
+            draw_pixel(x, y, bg);
+        }
+        x++;
+    }
+
+    return x;
+}
+
+static int draw_text(const char *text, int x, pixel_t fg, pixel_t bg)
+{
+    for (size_t i = 0; i < strlen(text); i++) {
+        x = draw_glyph(text[i], x, fg, bg);
+    }
+    return x;
+}
+
+static int do_text(int argc, char *argv[])
+{
+    if (argc < 2) {
+        return CMD_ARG;
+    }
+    draw_text(argv[1], 0, {255, 0}, {0, 0});
+    return CMD_OK;
+}
+
 static int do_enable(int argc, char *argv[])
 {
     bool enable = true;
@@ -206,6 +269,7 @@ const cmd_t commands[] = {
     { "pat", do_pat, "[pattern] display a specific pattern" },
     { "line", do_line, "<line> [r] [g] fill one row colour {r.g}" },
     { "pix", do_pix, "<col> <row> <hexcode> Set pixel with colour" },
+    { "text", do_text, "<text> Write text on the display" },
     { "enable", do_enable, "[0|1] Enable/disable" },
     { "reboot", do_reboot, "Reboot" },
     { "help", do_help, "Show help" },
@@ -239,18 +303,13 @@ void setup(void)
 
     EditInit(line, sizeof(line));
 
-    draw_init((pixel_t *)framebuffer);
-    for (int x = 0; x < 80; x++) {
-        for (int y = 0; y < 7; y++) {
-            pixel_t p;
-            p.r = map(x, 0, 79, 255, 0);
-            p.g = map(x, 0, 79, 0, 255);
-            draw_pixel(x,y, p);
-        }
-    }
-
     led_init(vsync);
+    memset(framebuffer, 0, sizeof(framebuffer));
     led_enable();
+
+    draw_text("ESP", 0, {255, 0}, {0, 0});
+    draw_text("LED", 20, {255, 255}, {0, 0});
+    draw_text("display", 40, {0, 255}, {0, 0});
 }
 
 void loop(void)
