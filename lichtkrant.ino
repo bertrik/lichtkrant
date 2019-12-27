@@ -181,14 +181,6 @@ static int do_pix(int argc, char *argv[])
     return CMD_OK;
 }
 
-static void draw_pixel(int x, int y, pixel_t c)
-{
-    if ((x < 0) || (x > 79) || (y < 0) || (y > 7)) {
-        return;
-    }
-    framebuffer[y][x] = c;
-}
-
 static int draw_glyph(char c, int x, pixel_t fg, pixel_t bg)
 {
     // ASCII?
@@ -302,6 +294,7 @@ void setup(void)
     print("\nESP-lichtkrant\n");
 
     EditInit(line, sizeof(line));
+    draw_init((pixel_t *)framebuffer);
 
     led_init(vsync);
     memset(framebuffer, 0, sizeof(framebuffer));
