@@ -14,9 +14,14 @@
 #define PIN_LATCH   D7          // J1.3
 #define PIN_SHIFT   D8          // J1.1
 
+typedef struct {
+    uint8_t r;
+    uint8_t g;
+} led_pixel_t;
+
 static const vsync_fn_t *vsync_fn;
 static pixel_t framebuffer[LED_NUM_ROWS][LED_NUM_COLS];
-static pixel_t pwmstate[LED_NUM_ROWS][LED_NUM_COLS];
+static led_pixel_t pwmstate[LED_NUM_ROWS][LED_NUM_COLS];
 static int row = 0;
 static int frame = 0;
 
@@ -39,11 +44,11 @@ static void ICACHE_RAM_ATTR led_tick(void)
         vsync_fn(frame++);
     } else {
         // write the column shift registers
-        pixel_t *pwmrow = pwmstate[row];
+        led_pixel_t *pwmrow = pwmstate[row];
         pixel_t *fb_row = framebuffer[row];
         for (int col = 0; col < LED_NUM_COLS; col++) {
             // dither
-            pixel_t c1 = pwmrow[col];
+            led_pixel_t c1 = pwmrow[col];
             pixel_t c2 = fb_row[col];
             int r = c1.r + c2.r;
             int g = c1.g + c2.g;
