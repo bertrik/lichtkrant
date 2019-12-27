@@ -3,7 +3,7 @@
 #include "cmdproc.h"
 #include "editline.h"
 #include "leddriver.h"
-#include "framebuffer.h"
+#include "draw.h"
 
 #include <ESP8266WiFi.h>
 #include <WiFiManager.h>
@@ -33,7 +33,7 @@ static void fill(pixel_t c)
 {
     for (int y = 0; y < LED_NUM_ROWS; y++) {
         for (int x = 0; x < LED_NUM_COLS; x++) {
-            framebuffer[y][x] = c;
+            draw_pixel(x, y, c);
         }
     }
 }
@@ -74,7 +74,7 @@ static int do_pat(int argc, char *argv[])
                 pixel_t c;
                 c.r = (x < 40) || (y == 3) ? 0 : 255;
                 c.g = (y < 4) ? 0 : 255;
-                framebuffer[y][x] = c;
+                draw_pixel(x, y, c);
             }
         }
         break;
@@ -82,8 +82,10 @@ static int do_pat(int argc, char *argv[])
         print("rasta vertical\n");
         for (int x = 0; x < 80; x++) {
             for (int y = 0; y < 7; y++) {
-                framebuffer[y][x].r = map(y, 0, 6, 255, 0);
-                framebuffer[y][x].g = map(y, 0, 6, 0, 255);
+                pixel_t c;
+                c.r = map(y, 0, 6, 255, 0);
+                c.g = map(y, 0, 6, 0, 255);
+                draw_pixel(x, y, c);
             }
         }
         break;
@@ -91,8 +93,10 @@ static int do_pat(int argc, char *argv[])
         print("rasta horizontal\n");
         for (int x = 0; x < 80; x++) {
             for (int y = 0; y < 7; y++) {
-                framebuffer[y][x].r = map(x, 0, 79, 255, 0);
-                framebuffer[y][x].g = map(x, 0, 79, 0, 255);
+                pixel_t c;
+                c.r = map(x, 0, 79, 255, 0);
+                c.g = map(x, 0, 79, 0, 255);
+                draw_pixel(x, y, c);
             }
         }
         break;
@@ -100,8 +104,10 @@ static int do_pat(int argc, char *argv[])
         print("red shades\n");
         for (int x = 0; x < 80; x++) {
             for (int y = 0; y < 7; y++) {
-                framebuffer[y][x].r = map(x, 0, 79, 255, 0);
-                framebuffer[y][x].g = 0;
+                pixel_t c;
+                c.r = map(x, 0, 79, 255, 0);
+                c.g = 0;
+                draw_pixel(x, y, c);
             }
         }
         break;
@@ -109,8 +115,10 @@ static int do_pat(int argc, char *argv[])
         print("green shades\n");
         for (int x = 0; x < 80; x++) {
             for (int y = 0; y < 7; y++) {
-                framebuffer[y][x].r = 0;
-                framebuffer[y][x].g = map(x, 0, 79, 255, 0);
+                pixel_t c;
+                c.r = 0;
+                c.g = map(x, 0, 79, 255, 0);
+                draw_pixel(x, y, c);
             }
         }
         break;
@@ -142,7 +150,7 @@ static int do_line(int argc, char *argv[])
     }
     pixel_t c = { r, g };
     for (int x = 0; x < 80; x++) {
-        framebuffer[line][x] = c;
+        draw_pixel(x, line, c);
     }
 
     return CMD_OK;
@@ -166,7 +174,7 @@ static int do_pix(int argc, char *argv[])
     pixel_t p;
     p.r = (c >> 16) & 0xFF;
     p.g = (c >> 8) & 0xFF;
-    framebuffer[y][x] = p;
+    draw_pixel(x, y, p);
 
     return CMD_OK;
 }
@@ -231,10 +239,13 @@ void setup(void)
 
     EditInit(line, sizeof(line));
 
+    draw_init((pixel_t *)framebuffer);
     for (int x = 0; x < 80; x++) {
         for (int y = 0; y < 7; y++) {
-            framebuffer[y][x].r = map(x, 0, 79, 255, 0);
-            framebuffer[y][x].g = map(x, 0, 79, 0, 255);
+            pixel_t p;
+            p.r = map(x, 0, 79, 255, 0);
+            p.g = map(x, 0, 79, 0, 255);
+            draw_pixel(x,y, p);
         }
     }
 
