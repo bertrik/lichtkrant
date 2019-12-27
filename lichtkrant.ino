@@ -3,6 +3,7 @@
 #include "cmdproc.h"
 #include "editline.h"
 #include "leddriver.h"
+#include "framebuffer.h"
 
 #include <ESP8266WiFi.h>
 #include <WiFiManager.h>

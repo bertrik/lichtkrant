@@ -2,8 +2,8 @@
 
 #include <Arduino.h>
 
+#include "framebuffer.h"
 #include "leddriver.h"
-
 
 #define PIN_MUX_2   D1          // J1.15
 #define PIN_MUX_1   D2          // J1.13
