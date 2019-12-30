@@ -185,10 +185,11 @@ static int do_pix(int argc, char *argv[])
 
 static int do_text(int argc, char *argv[])
 {
-    if (argc < 2) {
-        return CMD_ARG;
+    const char *text = "The quick brown fox jumped over the lazy dog";
+    if (argc > 1) {
+        text = argv[1];
     }
-    draw_text(argv[1], 0, {255, 0}, {0, 0});
+    draw_text(text, 0, {255, 0}, {0, 0});
     return CMD_OK;
 }
 
