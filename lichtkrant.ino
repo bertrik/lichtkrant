@@ -6,15 +6,16 @@
 #include "draw.h"
 
 #include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
 #include <WiFiManager.h>
 #include <Arduino.h>
 
 #define print Serial.printf
 
-#define RAW_TCP_PORT    1234
+#define RAWRGB_TCP_PORT    1234
 
 static WiFiManager wifiManager;
-static WiFiServer tcpServer(RAW_TCP_PORT);
+static WiFiServer tcpServer(RAWRGB_TCP_PORT);
 
 static char line[120];
 static pixel_t framebuffer[LED_NUM_ROWS][LED_NUM_COLS];
@@ -278,6 +279,8 @@ void setup(void)
     draw_text(WiFi.localIP().toString().c_str(), 0, {255, 255}, {0, 0});
 
     tcpServer.begin();
+    MDNS.begin("esp-ledsign");
+    MDNS.addService("raw_rgb", "tcp", RAWRGB_TCP_PORT);
 
     led_enable();
 }
@@ -326,4 +329,8 @@ void loop(void)
         }
         print(">");
     }
+    
+    // mDNS update
+    MDNS.update();
 }
+
