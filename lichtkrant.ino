@@ -9,12 +9,19 @@
 #include <ESP8266mDNS.h>
 #include <WiFiManager.h>
 #include <Arduino.h>
+#include <NTPClient.h>
 
 #define print Serial.printf
 
 #define RAWRGB_TCP_PORT    1234
 
+const char* NTP_SERVER = "nl.pool.ntp.org";
+// enter your time zone (https://remotemonitoringsystems.ca/time-zone-abbreviations.php)
+const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";    // Europe/Amsterdam
+
 static WiFiManager wifiManager;
+static WiFiUDP ntpUDP;
+static NTPClient ntpClient(ntpUDP, NTP_SERVER);
 static WiFiServer tcpServer(RAWRGB_TCP_PORT);
 
 static char line[120];
@@ -194,6 +201,32 @@ static int do_text(int argc, char *argv[])
     return CMD_OK;
 }
 
+static int do_datetime(int argc, char *argv[])
+{
+    time_t now = ntpClient.getEpochTime();
+    tm *timeinfo = localtime(&now);
+
+    char text[32];
+    int x;
+    pixel_t color;
+    const char *cmd = argv[0];
+    if (strcmp(cmd, "date") == 0) {
+        strftime(text, sizeof(text), "%F", timeinfo);
+        x = 10;
+        color = {255, 0};
+    } else if (strcmp(cmd, "time") == 0) {
+        strftime(text, sizeof(text), "%T", timeinfo);
+        x = 20;
+        color = {0, 255};
+    } else {
+        return CMD_ARG;
+    }
+
+    memset(framebuffer, 0, sizeof(framebuffer));
+    draw_text(text, x, color, {0, 0});
+    return CMD_OK;
+}
+
 static int do_enable(int argc, char *argv[])
 {
     bool enable = true;
@@ -222,6 +255,8 @@ const cmd_t commands[] = {
     { "line", do_line, "<line> [r] [g] fill one row colour {r.g}" },
     { "pix", do_pix, "<col> <row> <hexcode> Set pixel with colour" },
     { "text", do_text, "<text> Write text on the display" },
+    { "date", do_datetime, "show date" },
+    { "time", do_datetime, "show time" },
     { "enable", do_enable, "[0|1] Enable/disable" },
     { "reboot", do_reboot, "Reboot" },
     { "help", do_help, "Show help" },
@@ -280,6 +315,9 @@ void setup(void)
     MDNS.begin("esp-ledsign");
     MDNS.addService("raw_rgb", "tcp", RAWRGB_TCP_PORT);
 
+    setenv("TZ", TZ_INFO, 1);
+    ntpClient.begin();
+
     led_enable();
 }
 
@@ -329,6 +367,9 @@ void loop(void)
         print(">");
     }
     
+    // NTP update
+    ntpClient.update();
+
     // mDNS update
     MDNS.update();
 }
