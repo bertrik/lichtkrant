@@ -211,8 +211,8 @@ static int do_datetime(int argc, char *argv[])
     pixel_t color;
     const char *cmd = argv[0];
     if (strcmp(cmd, "date") == 0) {
-        strftime(text, sizeof(text), "%F", timeinfo);
-        x = 10;
+        strftime(text, sizeof(text), "%a %F", timeinfo);
+        x = 0;
         color = {255, 0};
     } else if (strcmp(cmd, "time") == 0) {
         strftime(text, sizeof(text), "%T", timeinfo);
@@ -309,7 +309,7 @@ void setup(void)
     memset(framebuffer, 0, sizeof(framebuffer));
 
     wifiManager.autoConnect("ESP-LEDSIGN");
-    draw_text(WiFi.localIP().toString().c_str(), 0, {255, 255}, {0, 0});
+    draw_text(WiFi.localIP().toString().c_str(), 6, {255, 255}, {0, 0});
 
     tcpServer.begin();
     MDNS.begin("esp-ledsign");
