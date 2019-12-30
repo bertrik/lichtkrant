@@ -11,7 +11,11 @@
 
 #define print Serial.printf
 
+#define RAW_TCP_PORT    1234
+
 static WiFiManager wifiManager;
+static WiFiServer tcpServer(RAW_TCP_PORT);
+
 static char line[120];
 static pixel_t framebuffer[LED_NUM_ROWS][LED_NUM_COLS];
 static volatile uint32_t frames = 0;
@@ -235,6 +239,22 @@ static int do_help(int argc, char *argv[])
     return CMD_OK;
 }
 
+// reads one raw RGB frame from TCP client into the frame buffer, returns true if successful
+static bool read_tcp_frame(WiFiClient *client, uint8_t *buf, int size)
+{
+    int remain = size;
+    while (remain > 0) {
+        int len = client->read(buf, remain);
+        if (!client->connected()) {
+            return false;
+        }
+        remain -= len;
+        buf += len;
+        yield();
+    }
+    return true;
+}
+
 // vsync callback
 static void ICACHE_RAM_ATTR vsync(int frame_nr)
 {
@@ -256,11 +276,27 @@ void setup(void)
     wifiManager.autoConnect("ESP-LEDSIGN");
     draw_text(WiFi.localIP().toString().c_str(), 0, {255, 255}, {0, 0});
 
+    tcpServer.begin();
+
     led_enable();
 }
 
 void loop(void)
 {
+    // handle incoming TCP frames
+    WiFiClient client = tcpServer.available();
+    if (client) {
+        print("Accepted TCP connection from %s...", client.remoteIP().toString().c_str());
+        int frames = 0;
+        unsigned long int start = millis();
+        while (read_tcp_frame(&client, (uint8_t *)framebuffer, sizeof(framebuffer))) {
+            frames++;
+        }
+        int fps = 1000 * frames / (millis() - start);
+        client.stop();
+        print("closed, fps = %d\n", fps);
+    }
+
     // parse command line
     bool haveLine = false;
     if (Serial.available()) {
