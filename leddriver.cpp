@@ -77,6 +77,7 @@ void led_init(const vsync_fn_t * vsync)
     // copy
     vsync_fn = vsync;
 
+    // set pins
     pinMode(PIN_ENABLE, OUTPUT);
     digitalWrite(PIN_ENABLE, 0);
     pinMode(PIN_LATCH, OUTPUT);
@@ -87,25 +88,23 @@ void led_init(const vsync_fn_t * vsync)
     pinMode(PIN_MUX_1, OUTPUT);
     pinMode(PIN_MUX_2, OUTPUT);
 
-    // clear the frame buffer
+    // clear the frame buffer and initialise pwm state
     memset(framebuffer, 0, sizeof(framebuffer));
-
-    // initialise the pwm state with random values
     for (int row = 0; row < LED_NUM_ROWS; row++) {
         for (int col = 0; col < LED_NUM_COLS; col++) {
             pwmstate[row][col].r = random(256);
             pwmstate[row][col].g = random(256);
         }
     }
-
     row = 0;
 
+    // initialise timer
+    timer1_isr_init();
 }
 
 void led_enable(void)
 {
     // set up timer interrupt
-    timer1_isr_init();
     timer1_disable();
     timer1_write(1250); // fps = 625000/number
     timer1_attachInterrupt(led_tick);
@@ -121,6 +120,7 @@ void led_disable(void)
     digitalWrite(PIN_ENABLE, 0);
 
     // detach the interrupt routine
+    timer1_detachInterrupt();
     timer1_disable();
 
     // flush shift register
