@@ -11,8 +11,8 @@
 
 #define print Serial.printf
 
+static WiFiManager wifiManager;
 static char line[120];
-
 static pixel_t framebuffer[LED_NUM_ROWS][LED_NUM_COLS];
 static volatile uint32_t frames = 0;
 
@@ -252,11 +252,11 @@ void setup(void)
 
     led_init(vsync);
     memset(framebuffer, 0, sizeof(framebuffer));
-    led_enable();
 
-    draw_text("ESP", 0, {255, 0}, {0, 0});
-    draw_text("LED", 20, {255, 255}, {0, 0});
-    draw_text("display", 40, {0, 255}, {0, 0});
+    wifiManager.autoConnect("ESP-LEDSIGN");
+    draw_text(WiFi.localIP().toString().c_str(), 0, {255, 255}, {0, 0});
+
+    led_enable();
 }
 
 void loop(void)
