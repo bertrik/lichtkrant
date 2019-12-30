@@ -244,17 +244,15 @@ static int do_help(int argc, char *argv[])
 // reads one raw RGB frame from TCP client into the frame buffer, returns true if successful
 static bool read_tcp_frame(WiFiClient *client, uint8_t *buf, int size)
 {
+    uint8_t *ptr = buf;
     int remain = size;
-    while (remain > 0) {
-        int len = client->read(buf, remain);
-        if (!client->connected()) {
-            return false;
-        }
+    while (client->connected() && (remain > 0)) {
+        int len = client->read(ptr, remain);
         remain -= len;
-        buf += len;
+        ptr += len;
         yield();
     }
-    return true;
+    return (remain == 0);
 }
 
 // vsync callback
@@ -296,9 +294,10 @@ void loop(void)
         while (read_tcp_frame(&client, (uint8_t *)framebuffer, sizeof(framebuffer))) {
             frames++;
         }
-        int fps = 1000 * frames / (millis() - start);
+        unsigned long int duration_ms = millis() - start;
+        int fps = 1000 * frames / duration_ms;
         client.stop();
-        print("closed, fps = %d\n", fps);
+        print("closed, %d frames/%lu ms = %d fps\n", frames, duration_ms, fps);
     }
 
     // parse command line
