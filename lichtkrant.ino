@@ -132,6 +132,17 @@ static int do_pat(int argc, char *argv[])
             }
         }
         break;
+    case 9:
+        print("red/geen shades\n");
+        for (int x = 0; x < 80; x++) {
+            for (int y = 0; y < 7; y++) {
+                pixel_t c;
+                c.r = map(x, 0, 79, 0, 255);
+                c.g = map(y, 0, 6, 0, 255);
+                draw_pixel(x, y, c);
+            }
+        }
+        break;
     default:
         print("Unhandled pattern %d\n", pat);
         return CMD_ARG;
