@@ -11,13 +11,28 @@ void draw_init(pixel_t *framebuffer)
     _framebuffer = framebuffer;
 }
 
-void draw_pixel(int x, int y, pixel_t p)
+bool draw_pixel(int x, int y, pixel_t c)
 {
     if ((x < 0) || (x >= LED_NUM_COLS) || (y < 0) || (y >= LED_NUM_ROWS)) {
-        return;
+        return false;
     }
     int i = y * LED_NUM_COLS + x;
-    _framebuffer[i] = p;
+    _framebuffer[i] = c;
+    return true;
+}
+
+void draw_vline(int x, pixel_t c)
+{
+    for (int y = 0; y < LED_NUM_ROWS; y++) {
+        draw_pixel(x, y, c);
+    }
+}
+
+void draw_hline(int y, pixel_t c)
+{
+    for (int x = 0; x < LED_NUM_COLS; x++) {
+        draw_pixel(x, y, c);
+    }
 }
 
 int draw_glyph(char c, int x, pixel_t fg, pixel_t bg)
@@ -26,6 +41,7 @@ int draw_glyph(char c, int x, pixel_t fg, pixel_t bg)
     if (c > 127) {
         return x;
     }
+
     // draw glyph
     int aa = 0;
     for (int col = 0; col < 5; col++) {
@@ -47,9 +63,7 @@ int draw_glyph(char c, int x, pixel_t fg, pixel_t bg)
 
     // draw space until next character
     if (aa != 0) {
-        for (int y = 0; y < 7; y++) {
-            draw_pixel(x, y, bg);
-        }
+        draw_vline(x, bg);
         x++;
     }
 

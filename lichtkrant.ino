@@ -44,9 +44,7 @@ static int do_fps(int argc, char *argv[])
 static void fill(pixel_t c)
 {
     for (int y = 0; y < LED_NUM_ROWS; y++) {
-        for (int x = 0; x < LED_NUM_COLS; x++) {
-            draw_pixel(x, y, c);
-        }
+        draw_hline(y, c);
     }
 }
 
@@ -161,9 +159,7 @@ static int do_line(int argc, char *argv[])
         g = atoi(argv[3]);
     }
     pixel_t c = { r, g };
-    for (int x = 0; x < 80; x++) {
-        draw_pixel(x, line, c);
-    }
+    draw_hline(line, c);
 
     return CMD_OK;
 }
@@ -174,21 +170,15 @@ static int do_pix(int argc, char *argv[])
         return CMD_ARG;
     }
     int x = atoi(argv[1]);
-    if ((x < 0) || (x >= LED_NUM_COLS)) {
-        return CMD_ARG;
-    }
     int y = atoi(argv[2]);
-    if ((y < 0) || (y >= LED_NUM_ROWS)) {
-        return CMD_ARG;
-    }
     uint32_t c = strtoul(argv[3], NULL, 16);
 
     pixel_t p;
     p.r = (c >> 16) & 0xFF;
     p.g = (c >> 8) & 0xFF;
-    draw_pixel(x, y, p);
+    bool result = draw_pixel(x, y, p);
 
-    return CMD_OK;
+    return result ? CMD_OK : CMD_ARG;
 }
 
 static int do_text(int argc, char *argv[])
