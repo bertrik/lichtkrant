@@ -133,7 +133,7 @@ static int do_pat(int argc, char *argv[])
         }
         break;
     case 9:
-        print("red/geen shades\n");
+        print("red/green shades\n");
         for (int x = 0; x < 80; x++) {
             for (int y = 0; y < 7; y++) {
                 pixel_t c;
