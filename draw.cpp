@@ -13,24 +13,23 @@ void draw_init(pixel_t *framebuffer)
 
 bool draw_pixel(int x, int y, pixel_t c)
 {
-    if ((x < 0) || (x >= LED_NUM_COLS) || (y < 0) || (y >= LED_NUM_ROWS)) {
+    if ((x < 0) || (x >= LED_WIDTH) || (y < 0) || (y >= LED_HEIGHT)) {
         return false;
     }
-    int i = y * LED_NUM_COLS + x;
-    _framebuffer[i] = c;
+    _framebuffer[y * LED_WIDTH + x] = c;
     return true;
 }
 
 void draw_vline(int x, pixel_t c)
 {
-    for (int y = 0; y < LED_NUM_ROWS; y++) {
+    for (int y = 0; y < LED_HEIGHT; y++) {
         draw_pixel(x, y, c);
     }
 }
 
 void draw_hline(int y, pixel_t c)
 {
-    for (int x = 0; x < LED_NUM_COLS; x++) {
+    for (int x = 0; x < LED_WIDTH; x++) {
         draw_pixel(x, y, c);
     }
 }

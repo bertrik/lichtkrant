@@ -25,7 +25,7 @@ static NTPClient ntpClient(ntpUDP, NTP_SERVER);
 static WiFiServer tcpServer(RAWRGB_TCP_PORT);
 
 static char line[120];
-static pixel_t framebuffer[LED_NUM_ROWS][LED_NUM_COLS];
+static pixel_t framebuffer[LED_HEIGHT][LED_WIDTH];
 static volatile uint32_t frames = 0;
 
 static int do_fps(int argc, char *argv[])
@@ -43,7 +43,7 @@ static int do_fps(int argc, char *argv[])
 
 static void fill(pixel_t c)
 {
-    for (int y = 0; y < LED_NUM_ROWS; y++) {
+    for (int y = 0; y < LED_HEIGHT; y++) {
         draw_hline(y, c);
     }
 }

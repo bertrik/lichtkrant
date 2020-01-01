@@ -20,8 +20,8 @@ typedef struct {
 } led_pixel_t;
 
 static const vsync_fn_t *vsync_fn;
-static pixel_t framebuffer[LED_NUM_ROWS][LED_NUM_COLS];
-static led_pixel_t pwmstate[LED_NUM_ROWS][LED_NUM_COLS];
+static pixel_t framebuffer[LED_HEIGHT][LED_WIDTH];
+static led_pixel_t pwmstate[LED_HEIGHT][LED_WIDTH];
 static int row = 0;
 static int frame = 0;
 
@@ -46,7 +46,7 @@ static void ICACHE_RAM_ATTR led_tick(void)
         // write the column shift registers
         led_pixel_t *pwmrow = pwmstate[row];
         pixel_t *fb_row = framebuffer[row];
-        for (int col = 0; col < LED_NUM_COLS; col++) {
+        for (int col = 0; col < LED_WIDTH; col++) {
             // dither
             led_pixel_t c1 = pwmrow[col];
             pixel_t c2 = fb_row[col];
@@ -90,8 +90,8 @@ void led_init(const vsync_fn_t * vsync)
 
     // clear the frame buffer and initialise pwm state
     memset(framebuffer, 0, sizeof(framebuffer));
-    for (int row = 0; row < LED_NUM_ROWS; row++) {
-        for (int col = 0; col < LED_NUM_COLS; col++) {
+    for (int row = 0; row < LED_HEIGHT; row++) {
+        for (int col = 0; col < LED_WIDTH; col++) {
             pwmstate[row][col].r = random(256);
             pwmstate[row][col].g = random(256);
         }

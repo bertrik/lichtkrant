@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-#define LED_NUM_ROWS    7
-#define LED_NUM_COLS    80
+#define LED_HEIGHT      7
+#define LED_WIDTH       80
 
 typedef struct {
     uint8_t r;
