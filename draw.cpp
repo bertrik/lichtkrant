@@ -5,6 +5,7 @@
 #include "draw.h"
 
 static pixel_t *_framebuffer;
+static pixel_t _fg;
 
 void draw_init(pixel_t *framebuffer)
 {
@@ -34,7 +35,27 @@ void draw_hline(int y, pixel_t c)
     }
 }
 
-int draw_glyph(char c, int x, pixel_t fg, pixel_t bg)
+static pixel_t shade_fg(int x, int y)
+{
+    return _fg;
+}
+
+void draw_fill_ext(color_fn_t *fn)
+{
+    for (int y = 0; y < LED_HEIGHT; y++) {
+        for (int x = 0; x < LED_WIDTH; x++) {
+            draw_pixel(x, y, fn(x, y));
+        }
+    }
+}
+
+void draw_fill(pixel_t c)
+{
+    _fg = c;
+    draw_fill_ext(shade_fg);
+}
+
+int draw_glyph(char c, int x, color_fn_t *fn, pixel_t bg)
 {
     // ASCII?
     if (c > 127) {
@@ -54,7 +75,7 @@ int draw_glyph(char c, int x, pixel_t fg, pixel_t bg)
 
         // draw column
         for (int y = 0; y < 7; y++) {
-            draw_pixel(x, y, (a & 1) ? fg : bg);
+            draw_pixel(x, y, a & 1 ? fn(x, y) : bg);
             a >>= 1;
         }
         x++;
@@ -71,9 +92,17 @@ int draw_glyph(char c, int x, pixel_t fg, pixel_t bg)
 
 int draw_text(const char *text, int x, pixel_t fg, pixel_t bg)
 {
+    _fg = fg;
     for (size_t i = 0; i < strlen(text); i++) {
-        x = draw_glyph(text[i], x, fg, bg);
+        x = draw_glyph(text[i], x, shade_fg, bg);
     }
     return x;
 }
 
+int draw_text_ext(const char *text, int x, color_fn_t *fn, pixel_t bg)
+{
+    for (size_t i = 0; i < strlen(text); i++) {
+        x = draw_glyph(text[i], x, fn, bg);
+    }
+    return x;
+}

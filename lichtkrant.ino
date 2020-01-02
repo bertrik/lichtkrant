@@ -41,11 +41,12 @@ static int do_fps(int argc, char *argv[])
     return CMD_OK;
 }
 
-static void fill(pixel_t c)
+static pixel_t shade_rasta_vertical(int x, int y)
 {
-    for (int y = 0; y < LED_HEIGHT; y++) {
-        draw_hline(y, c);
-    }
+    pixel_t c;
+    c.r = map(y, 0, 6, 255, 0);
+    c.g = map(y, 0, 6, 0, 255);
+    return c;
 }
 
 static int do_pat(int argc, char *argv[])
@@ -55,49 +56,35 @@ static int do_pat(int argc, char *argv[])
     }
     int pat = atoi(argv[1]);
 
-    pixel_t c;
     switch (pat) {
     case 0:
         print("All clear\n");
-        c = { 0, 0 };
-        fill(c);
+        draw_fill({0, 0});
         break;
     case 1:
         print("All red\n");
-        c = { 255, 0 };
-        fill(c);
+        draw_fill({255, 0});
         break;
     case 2:
         print("All green\n");
-        c = { 0, 255 };
-        fill(c);
+        draw_fill({0, 255});
         break;
     case 3:
         print("All yellow\n");
-        c = { 255, 255 };
-        fill(c);
+        draw_fill({255, 255});
         break;
     case 4:
         print("quattro stagioni\n");
-        for (int x = 0; x < 80; x++) {
-            for (int y = 0; y < 7; y++) {
-                pixel_t c;
-                c.r = (x < 40) || (y == 3) ? 0 : 255;
-                c.g = (y < 4) ? 0 : 255;
-                draw_pixel(x, y, c);
-            }
-        }
+        draw_fill_ext([](int x, int y) -> pixel_t {
+            pixel_t c;
+            c.r = (x < 40) || (y == 3) ? 0 : 255;
+            c.g = (y < 4) ? 0 : 255;
+            return c;
+        });
         break;
     case 5:
         print("rasta vertical\n");
-        for (int x = 0; x < 80; x++) {
-            for (int y = 0; y < 7; y++) {
-                pixel_t c;
-                c.r = map(y, 0, 6, 255, 0);
-                c.g = map(y, 0, 6, 0, 255);
-                draw_pixel(x, y, c);
-            }
-        }
+        draw_fill_ext(shade_rasta_vertical);
         break;
     case 6:
         print("rasta horizontal\n");
@@ -112,36 +99,24 @@ static int do_pat(int argc, char *argv[])
         break;
     case 7:
         print("red shades\n");
-        for (int x = 0; x < 80; x++) {
-            for (int y = 0; y < 7; y++) {
-                pixel_t c;
-                c.r = map(x, 0, 79, 255, 0);
-                c.g = 0;
-                draw_pixel(x, y, c);
-            }
-        }
+        draw_fill_ext([](int x, int y) -> pixel_t {
+            return {(uint8_t)map(x, 0, 79, 255, 0), 0}; 
+        });
         break;
     case 8:
         print("green shades\n");
-        for (int x = 0; x < 80; x++) {
-            for (int y = 0; y < 7; y++) {
-                pixel_t c;
-                c.r = 0;
-                c.g = map(x, 0, 79, 255, 0);
-                draw_pixel(x, y, c);
-            }
-        }
+        draw_fill_ext([](int x, int y) -> pixel_t {
+            return {0, (uint8_t)map(x, 0, 79, 255, 0)}; 
+        });
         break;
     case 9:
         print("red/green shades\n");
-        for (int x = 0; x < 80; x++) {
-            for (int y = 0; y < 7; y++) {
-                pixel_t c;
-                c.r = map(x, 0, 79, 0, 255);
-                c.g = map(y, 0, 6, 0, 255);
-                draw_pixel(x, y, c);
-            }
-        }
+        draw_fill_ext([](int x, int y) -> pixel_t {
+            pixel_t c;
+            c.r = map(x, 0, 79, 0, 255);
+            c.g = map(y, 0, 6, 0, 255);
+            return c;
+        });
         break;
     default:
         print("Unhandled pattern %d\n", pat);
@@ -310,7 +285,7 @@ void setup(void)
     memset(framebuffer, 0, sizeof(framebuffer));
 
     wifiManager.autoConnect("ESP-LEDSIGN");
-    draw_text(WiFi.localIP().toString().c_str(), 6, {255, 255}, {0, 0});
+    draw_text_ext(WiFi.localIP().toString().c_str(), 0, shade_rasta_vertical, {0, 0});
 
     tcpServer.begin();
     MDNS.begin("esp-ledsign");
