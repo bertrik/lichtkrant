@@ -26,15 +26,15 @@ static WiFiServer tcpServer(RAWRGB_TCP_PORT);
 
 static char line[120];
 static pixel_t framebuffer[LED_HEIGHT][LED_WIDTH];
-static volatile uint32_t frames = 0;
+static volatile uint32_t frame_counter = 0;
 
 static int do_fps(int argc, char *argv[])
 {
     print("Measuring ...");
 
-    uint32_t count = frames;
+    uint32_t count = frame_counter;
     delay(1000);
-    int fps = frames - count;
+    int fps = frame_counter - count;
 
     print("FPS = %d\n", fps);
 
@@ -131,9 +131,9 @@ static int do_line(int argc, char *argv[])
     if (argc < 2) {
         return CMD_ARG;
     }
-    int line = atoi(argv[1]);
-    if ((line < 0) || (line >= 7)) {
-        print("Invalid line %d\n", line);
+    int y = atoi(argv[1]);
+    if ((y < 0) || (y >= 7)) {
+        print("Invalid line %d\n", y);
         return -2;
     }
     uint8_t r = 255;
@@ -145,7 +145,7 @@ static int do_line(int argc, char *argv[])
         g = atoi(argv[3]);
     }
     pixel_t c = { r, g };
-    draw_hline(line, c);
+    draw_hline(y, c);
 
     return CMD_OK;
 }
@@ -270,7 +270,7 @@ static bool read_tcp_frame(WiFiClient *client, uint8_t *buf, int size)
 static void ICACHE_RAM_ATTR vsync(int frame_nr)
 {
     led_write_framebuffer(framebuffer);
-    frames = frame_nr;
+    frame_counter = frame_nr;
 }
 
 void setup(void)
