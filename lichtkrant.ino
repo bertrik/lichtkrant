@@ -23,6 +23,7 @@ static WiFiManager wifiManager;
 static WiFiUDP ntpUDP;
 static NTPClient ntpClient(ntpUDP, NTP_SERVER);
 static WiFiServer tcpServer(RAWRGB_TCP_PORT);
+static pixel_t tcpframe[8][80];
 
 static char line[120];
 static pixel_t framebuffer[LED_HEIGHT][LED_WIDTH];
@@ -305,7 +306,9 @@ void loop(void)
         print("Accepted TCP connection from %s...", client.remoteIP().toString().c_str());
         int frames = 0;
         unsigned long int start = millis();
-        while (read_tcp_frame(&client, (uint8_t *)framebuffer, sizeof(framebuffer))) {
+        while (read_tcp_frame(&client, (uint8_t *)tcpframe, sizeof(tcpframe))) {
+            // copy first 7 lines
+            memcpy(framebuffer, tcpframe, sizeof(framebuffer));
             frames++;
         }
         unsigned long int duration_ms = millis() - start;
