@@ -50,8 +50,8 @@ static void ICACHE_RAM_ATTR led_tick(void)
             // dither
             led_pixel_t c1 = pwmrow[col];
             pixel_t c2 = fb_row[col];
-            int r = c1.r + c2.r;
-            int g = c1.g + c2.g;
+            int r = c1.r + (c2.r & 0xF0);
+            int g = c1.g + (c2.g & 0xF0);
 
             digitalWrite(PIN_SHIFT, 0);
             digitalWrite(PIN_DATA_R, r < 256);
