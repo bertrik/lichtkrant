@@ -74,19 +74,26 @@ void led_write_framebuffer(const void *data)
 
 void led_init(const vsync_fn_t * vsync)
 {
-    // copy
-    vsync_fn = vsync;
-
-    // set pins
+    // set all pins to a defined state
     pinMode(PIN_ENABLE, OUTPUT);
     digitalWrite(PIN_ENABLE, 0);
     pinMode(PIN_LATCH, OUTPUT);
+    digitalWrite(PIN_LATCH, 0);
     pinMode(PIN_SHIFT, OUTPUT);
+    digitalWrite(PIN_SHIFT, 0);
     pinMode(PIN_DATA_R, OUTPUT);
+    digitalWrite(PIN_DATA_R, 1);
     pinMode(PIN_DATA_G, OUTPUT);
+    digitalWrite(PIN_DATA_G, 1);
     pinMode(PIN_MUX_0, OUTPUT);
+    digitalWrite(PIN_MUX_0, 0);
     pinMode(PIN_MUX_1, OUTPUT);
+    digitalWrite(PIN_MUX_1, 0);
     pinMode(PIN_MUX_2, OUTPUT);
+    digitalWrite(PIN_MUX_2, 0);
+
+    // copy vsync pointer
+    vsync_fn = vsync;
 
     // clear the frame buffer and initialise pwm state
     memset(framebuffer, 0, sizeof(framebuffer));

@@ -276,13 +276,14 @@ static void ICACHE_RAM_ATTR vsync(int frame_nr)
 
 void setup(void)
 {
+    led_init(vsync);
+
     Serial.begin(115200);
     print("\nESP-lichtkrant\n");
 
     EditInit(line, sizeof(line));
     draw_init((pixel_t *)framebuffer);
 
-    led_init(vsync);
     memset(framebuffer, 0, sizeof(framebuffer));
 
     wifiManager.autoConnect("ESP-LEDSIGN");
