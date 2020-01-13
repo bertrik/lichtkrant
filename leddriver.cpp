@@ -27,7 +27,10 @@ static int frame = 0;
 
 static void ICACHE_RAM_ATTR led_tick(void)
 {
-    // latch the data
+    // deactivate rows while updating column data and row multiplexer
+    digitalWrite(PIN_ENABLE, 0);
+
+    // activate column data
     digitalWrite(PIN_LATCH, 1);
 
     // set the row multiplexer
@@ -35,8 +38,8 @@ static void ICACHE_RAM_ATTR led_tick(void)
     digitalWrite(PIN_MUX_1, row & 2);
     digitalWrite(PIN_MUX_2, row & 4);
 
-    // prepare to latch the columns
-    digitalWrite(PIN_LATCH, 0);
+    // activate rows again
+    digitalWrite(PIN_ENABLE, 1);
 
     // write column data
     row = (row + 1) & 7;
@@ -65,6 +68,9 @@ static void ICACHE_RAM_ATTR led_tick(void)
             digitalWrite(PIN_SHIFT, 1);
         }
     }
+
+    // deactivate latch
+    digitalWrite(PIN_LATCH, 0);
 }
 
 void led_write_framebuffer(const void *data)
@@ -116,24 +122,21 @@ void led_enable(void)
     timer1_write(1250); // fps = 625000/number
     timer1_attachInterrupt(led_tick);
     timer1_enable(TIM_DIV16, TIM_EDGE, TIM_LOOP);
-
-    // enable pin
-    digitalWrite(PIN_ENABLE, 1);
 }
 
 void led_disable(void)
 {
-    // enable pin
-    digitalWrite(PIN_ENABLE, 0);
-
     // detach the interrupt routine
     timer1_detachInterrupt();
     timer1_disable();
 
     // flush shift register
-    row = 0;
+    row = 7;
     memset(framebuffer, 0, sizeof(framebuffer));
     led_tick();
+
+    // disable row output
+    digitalWrite(PIN_ENABLE, 0);
 }
 
 
