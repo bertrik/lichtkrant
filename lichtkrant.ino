@@ -119,6 +119,15 @@ static int do_pat(int argc, char *argv[])
             return c;
         });
         break;
+    case 10:
+        print("Bleeding test pattern\n");
+        for (int y = 0; y < 7; y++) {
+            int x = y * 11;
+            draw_pixel(x, y, {255, 0});
+            draw_pixel(x + 3 , y, {255, 255});
+            draw_pixel(x + 6, y, {0, 255});
+        }
+        break;
     default:
         print("Unhandled pattern %d\n", pat);
         return CMD_ARG;
