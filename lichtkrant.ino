@@ -234,6 +234,19 @@ static int do_reboot(int argc, char *argv[])
     return CMD_OK;
 }
 
+static int do_hang(int argc, char *argv[])
+{
+    print("Hanging");
+    unsigned long start = millis();
+    while (true) {
+        if ((millis() - start) > 100) {
+            start += 100;
+            printf(".");
+        }
+    }
+    return 0;
+}
+
 static int do_help(int argc, char *argv[]);
 const cmd_t commands[] = {
     { "fps", do_fps, "Show FPS" },
@@ -245,6 +258,7 @@ const cmd_t commands[] = {
     { "time", do_datetime, "show time" },
     { "enable", do_enable, "[0|1] Enable/disable" },
     { "reboot", do_reboot, "Reboot" },
+    { "hang", do_hang, "Hang (triggering a watchdog reset)" },
     { "help", do_help, "Show help" },
     { NULL, NULL, NULL }
 };
