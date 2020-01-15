@@ -187,6 +187,30 @@ static int do_text(int argc, char *argv[])
     return CMD_OK;
 }
 
+static char scroll_text[100];
+static int scroll_pos = 0;
+static bool scroll_active = false;
+static unsigned long scroll_tick = 0;
+
+static int do_scroll(int argc, char *argv[])
+{
+    if (argc < 2) {
+        return CMD_ARG;
+    }
+
+    strcpy(scroll_text, argv[1]);
+    for (int i = 2; i < argc; i++) {
+        strcat(scroll_text, " ");
+        strcat(scroll_text, argv[i]);
+    }
+    print("%s\n", scroll_text);
+
+    scroll_pos = 80;
+    scroll_active = true;
+
+    return CMD_OK;
+}
+
 static int do_datetime(int argc, char *argv[])
 {
     time_t now = ntpClient.getEpochTime();
@@ -254,6 +278,7 @@ const cmd_t commands[] = {
     { "line", do_line, "<line> [r] [g] fill one row colour {r.g}" },
     { "pix", do_pix, "<col> <row> <hexcode> Set pixel with colour" },
     { "text", do_text, "<text> Write text on the display" },
+    { "scroll", do_scroll, "<text> Scroll text on the display" },
     { "date", do_datetime, "show date" },
     { "time", do_datetime, "show time" },
     { "enable", do_enable, "[0|1] Enable/disable" },
@@ -370,6 +395,19 @@ void loop(void)
         print(">");
     }
     
+    // text scrolling
+    if (scroll_active) {
+        unsigned long tick = millis() / 40;
+        if (scroll_tick != tick) {
+            scroll_tick = tick;
+            int end = draw_text_ext(scroll_text, scroll_pos, shade_rasta_vertical, {0, 0});
+            if (end < 0) {
+                scroll_active = false;
+            }
+            scroll_pos--;
+        }
+    }
+
     // NTP update
     ntpClient.update();
 
