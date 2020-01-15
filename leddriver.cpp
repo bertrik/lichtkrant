@@ -120,8 +120,8 @@ void led_enable(void)
 {
     // set up timer interrupt
     timer1_disable();
-    timer1_write(1250); // fps = 625000/number
     timer1_attachInterrupt(led_hsync);
+    timer1_write(1250); // fps = 625000/number
     timer1_enable(TIM_DIV16, TIM_EDGE, TIM_LOOP);
 }
 
