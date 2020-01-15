@@ -25,7 +25,8 @@ static led_pixel_t pwmstate[LED_HEIGHT][LED_WIDTH];
 static int row = 0;
 static int frame = 0;
 
-static void ICACHE_RAM_ATTR led_tick(void)
+// "horizontal" interrupt routine, displays one line
+static void ICACHE_RAM_ATTR led_hsync(void)
 {
     // deactivate rows while updating column data and row multiplexer
     digitalWrite(PIN_ENABLE, 0);
@@ -120,7 +121,7 @@ void led_enable(void)
     // set up timer interrupt
     timer1_disable();
     timer1_write(1250); // fps = 625000/number
-    timer1_attachInterrupt(led_tick);
+    timer1_attachInterrupt(led_hsync);
     timer1_enable(TIM_DIV16, TIM_EDGE, TIM_LOOP);
 }
 
@@ -133,7 +134,7 @@ void led_disable(void)
     // flush shift register
     row = 7;
     memset(framebuffer, 0, sizeof(framebuffer));
-    led_tick();
+    led_hsync();
 
     // disable row output
     digitalWrite(PIN_ENABLE, 0);
