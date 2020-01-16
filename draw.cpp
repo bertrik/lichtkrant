@@ -75,7 +75,7 @@ int draw_glyph(char c, int x, color_fn_t *fn, pixel_t bg)
 
         // draw column
         for (int y = 0; y < 7; y++) {
-            draw_pixel(x, y, a & 1 ? fn(x, y) : bg);
+            draw_pixel(x, y, (a & 1) ? fn(x, y) : bg);
             a >>= 1;
         }
         x++;

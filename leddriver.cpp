@@ -104,10 +104,10 @@ void led_init(const vsync_fn_t * vsync)
 
     // clear the frame buffer and initialise pwm state
     memset(framebuffer, 0, sizeof(framebuffer));
-    for (int row = 0; row < LED_HEIGHT; row++) {
-        for (int col = 0; col < LED_WIDTH; col++) {
-            pwmstate[row][col].r = random(256);
-            pwmstate[row][col].g = random(256);
+    for (int y = 0; y < LED_HEIGHT; y++) {
+        for (int x = 0; x < LED_WIDTH; x++) {
+            pwmstate[y][x].r = random(256);
+            pwmstate[y][x].g = random(256);
         }
     }
     row = 0;
