@@ -1,6 +1,6 @@
 #include <string.h>
 
-#include "glcdfont.h"
+#include "font.h"
 #include "framebuffer.h"
 #include "draw.h"
 
@@ -55,7 +55,7 @@ void draw_fill(pixel_t c)
     draw_fill_ext(shade_fg);
 }
 
-int draw_glyph(char c, int x, color_fn_t *fn, pixel_t bg)
+int draw_glyph(int c, int x, color_fn_t *fn, pixel_t bg)
 {
     // ASCII?
     if (c > 127) {
@@ -63,9 +63,9 @@ int draw_glyph(char c, int x, color_fn_t *fn, pixel_t bg)
     }
 
     // draw glyph
-    int aa = 0;
+    unsigned char aa = 0;
     for (int col = 0; col < 5; col++) {
-        uint8_t a = font[c * 5 + col];
+        unsigned char a = font[c][col];
 
         // skip repeating space
         if ((aa == 0) && (a == 0)) {
@@ -93,10 +93,7 @@ int draw_glyph(char c, int x, color_fn_t *fn, pixel_t bg)
 int draw_text(const char *text, int x, pixel_t fg, pixel_t bg)
 {
     _fg = fg;
-    for (size_t i = 0; i < strlen(text); i++) {
-        x = draw_glyph(text[i], x, shade_fg, bg);
-    }
-    return x;
+    return draw_text_ext(text, x, shade_fg, bg);
 }
 
 int draw_text_ext(const char *text, int x, color_fn_t *fn, pixel_t bg)
