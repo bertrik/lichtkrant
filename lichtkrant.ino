@@ -25,7 +25,8 @@ static NTPClient ntpClient(ntpUDP, NTP_SERVER);
 static WiFiServer tcpServer(RAWRGB_TCP_PORT);
 static pixel_t tcpframe[8][80];
 
-static char line[120];
+static char editline[120];
+static char textline[120];
 static pixel_t framebuffer[LED_HEIGHT][LED_WIDTH];
 static volatile uint32_t frame_counter = 0;
 
@@ -177,37 +178,39 @@ static int do_pix(int argc, char *argv[])
     return result ? CMD_OK : CMD_ARG;
 }
 
-static int do_text(int argc, char *argv[])
+static int build_textline(int argc, char *argv[], char *line)
 {
-    const char *text = "The quick brown fox jumped over the lazy dog";
-    if (argc > 1) {
-        text = argv[1];
+    if (argc < 2) {
+        return CMD_ARG;
     }
-    draw_text(text, 0, {255, 0}, {0, 0});
+    strcpy(line, argv[1]);
+    for (int i = 2; i < argc; i++) {
+        strcat(line, " ");
+        strcat(line, argv[i]);
+    }
     return CMD_OK;
 }
 
-static char scroll_text[100];
+static int do_text(int argc, char *argv[])
+{
+    int res = build_textline(argc, argv, textline);
+    if (res >= 0) {
+        draw_text(textline, 0, {255, 0}, {0, 0});
+    }
+    return res;
+}
+
 static int scroll_pos = 0;
 static bool scroll_active = false;
 static unsigned long scroll_tick = 0;
 
 static int do_scroll(int argc, char *argv[])
 {
-    if (argc < 2) {
-        return CMD_ARG;
+    int res = build_textline(argc, argv, textline);
+    if (res >= 0) {
+        scroll_pos = 80;
+        scroll_active = true;
     }
-
-    strcpy(scroll_text, argv[1]);
-    for (int i = 2; i < argc; i++) {
-        strcat(scroll_text, " ");
-        strcat(scroll_text, argv[i]);
-    }
-    print("%s\n", scroll_text);
-
-    scroll_pos = 80;
-    scroll_active = true;
-
     return CMD_OK;
 }
 
@@ -329,7 +332,7 @@ void setup(void)
     Serial.begin(115200);
     print("\nESP-lichtkrant\n");
 
-    EditInit(line, sizeof(line));
+    EditInit(editline, sizeof(editline));
     draw_init((pixel_t *)framebuffer);
 
     memset(framebuffer, 0, sizeof(framebuffer));
@@ -374,7 +377,7 @@ void loop(void)
         Serial.write(c);
     }
     if (haveLine) {
-        int result = cmd_process(commands, line);
+        int result = cmd_process(commands, editline);
         switch (result) {
         case CMD_OK:
             print("OK\n");
@@ -400,7 +403,7 @@ void loop(void)
         unsigned long tick = millis() / 40;
         if (scroll_tick != tick) {
             scroll_tick = tick;
-            int end = draw_text_ext(scroll_text, scroll_pos, shade_rasta_vertical, {0, 0});
+            int end = draw_text_ext(textline, scroll_pos, shade_rasta_vertical, {0, 0});
             if (end < 0) {
                 scroll_active = false;
             }
