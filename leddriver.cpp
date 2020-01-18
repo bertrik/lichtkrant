@@ -25,22 +25,24 @@ static led_pixel_t pwmstate[LED_HEIGHT][LED_WIDTH];
 static int row = 0;
 static int frame = 0;
 
+#define FAST_GPIO_WRITE(pin,val) if (val) GPOS = 1<<(pin); else GPOC = 1<<(pin)
+
 // "horizontal" interrupt routine, displays one line
 static void ICACHE_RAM_ATTR led_hsync(void)
 {
     // deactivate rows while updating column data and row multiplexer
-    digitalWrite(PIN_ENABLE, 0);
+    FAST_GPIO_WRITE(PIN_ENABLE, 0);
 
     // activate column data
-    digitalWrite(PIN_LATCH, 1);
+    FAST_GPIO_WRITE(PIN_LATCH, 1);
 
     // set the row multiplexer
-    digitalWrite(PIN_MUX_0, row & 1);
-    digitalWrite(PIN_MUX_1, row & 2);
-    digitalWrite(PIN_MUX_2, row & 4);
+    FAST_GPIO_WRITE(PIN_MUX_0, row & 1);
+    FAST_GPIO_WRITE(PIN_MUX_1, row & 2);
+    FAST_GPIO_WRITE(PIN_MUX_2, row & 4);
 
     // activate rows again
-    digitalWrite(PIN_ENABLE, 1);
+    FAST_GPIO_WRITE(PIN_ENABLE, 1);
 
     // write column data
     row = (row + 1) & 7;
@@ -57,21 +59,22 @@ static void ICACHE_RAM_ATTR led_hsync(void)
             int r = c1.r + (c2.r & 0xF0);
             int g = c1.g + (c2.g & 0xF0);
 
-            digitalWrite(PIN_SHIFT, 0);
-            digitalWrite(PIN_DATA_R, r < 256);
-            digitalWrite(PIN_DATA_G, g < 256);
+            // write R and G data
+            FAST_GPIO_WRITE(PIN_SHIFT, 0);
+            FAST_GPIO_WRITE(PIN_DATA_R, r < 256);
+            FAST_GPIO_WRITE(PIN_DATA_G, g < 256);
 
             // write back
             pwmrow[col].r = r;
             pwmrow[col].g = g;
 
             // shift
-            digitalWrite(PIN_SHIFT, 1);
+            FAST_GPIO_WRITE(PIN_SHIFT, 1);
         }
     }
 
     // deactivate latch
-    digitalWrite(PIN_LATCH, 0);
+    FAST_GPIO_WRITE(PIN_LATCH, 0);
 }
 
 void led_write_framebuffer(const void *data)
