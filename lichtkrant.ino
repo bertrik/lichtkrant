@@ -27,7 +27,7 @@ static NTPClient ntpClient(ntpUDP, NTP_SERVER);
 static WiFiServer tcpServer(RAWRGB_TCP_PORT);
 static WiFiUDP udpServer;
 static pixel_t tcpframe[8][80];
-static uint8_t udpframe[8][80][2];
+static uint8_t udpframe[8 * 80 * 2];
 
 static char editline[120];
 static char textline[120];
@@ -380,9 +380,11 @@ void loop(void)
         int len = udpServer.read((uint8_t *)udpframe, sizeof(udpframe));
         if (len == sizeof(udpframe)) {
             // convert first 7 lines from RGB565 to RG88
+            uint8_t *p = (uint8_t *)udpframe;
             for (int y = 0; y < 7; y++) {
                 for (int x = 0; x < 80; x++) {
-                    uint16_t rgb565 = (udpframe[y][x][0] << 8) | udpframe[y][x][1];
+                    uint16_t rgb565 = (p[0] << 8) | p[1];
+                    p += 2;
                     uint8_t r = (rgb565 >> 8) & 0xF8;
                     r += (r >> 5);
                     uint8_t g = (rgb565 >> 3) & 0xFC;
