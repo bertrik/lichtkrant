@@ -347,6 +347,7 @@ void setup(void)
     tcpServer.begin();
     MDNS.begin("esp-ledsign");
     MDNS.addService("raw_rgb", "tcp", RAWRGB_TCP_PORT);
+    MDNS.addService("rgb565", "udp", RGB565_UDP_PORT);
 
     setenv("TZ", TZ_INFO, 1);
     ntpClient.begin();
