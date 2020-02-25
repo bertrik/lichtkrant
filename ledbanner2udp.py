@@ -20,11 +20,13 @@ def rgb888_to_rgb565(rgb):
 def convert(host, port):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     while True:
-        # read ledbanner frame
+        # read ledbanner frame from stdin
         data = sys.stdin.buffer.read(80*8*3)
         if len(data) != 80*8*3:
             break
-        # TODO copy to stdout
+
+        # copy to stdout
+        sys.stdout.buffer.write(data)
 
         # convert to RGB565
         out = bytearray()
