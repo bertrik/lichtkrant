@@ -17,7 +17,25 @@ def rgb888_to_rgb565(rgb):
     rgb565 = ((r << 8) & 0xF800) | ((g << 3) & 0x07E0) | ((b >> 3) & 0x001F)
     return rgb565.to_bytes(2, byteorder='big')
 
-def convert(host, port):
+def convert_frame(data):
+    """ Converts the supplied rgb888 frame and returns a rgb565 frame  """
+    num = len(data) // 3
+    out = bytearray(2 * num)
+    pi = po = 0
+    for i in range(0, num):
+        rgb888 = data[pi:pi+3]
+        pi += 3
+        out[po:po+2] = rgb888_to_rgb565(rgb888)
+        po += 2
+    return out
+
+def main():
+    """ The main entry point """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--ip", type=str, help="The UDP host ip", default="localhost")
+    parser.add_argument("-p", "--port", type=int, help="The UDP host port", default="1565")
+    args = parser.parse_args()
+
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     while True:
         # read ledbanner frame from stdin
@@ -28,26 +46,11 @@ def convert(host, port):
         # copy to stdout
         sys.stdout.buffer.write(data)
 
-        # convert to RGB565
-        out = bytearray()
-        for y in range(8):
-            for x in range(80):
-                pos = (y * 80 + x) * 3
-                rgb888 = data[pos:pos+3]
-                rgb565 = rgb888_to_rgb565(rgb888)
-                out += rgb565
+        # convert
+        frame = convert_frame(data)
 
         # send over UDP
-        s.sendto(out, (host, port))
-
-def main():
-    """ The main entry point """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--ip", type=str, help="The UDP host ip", default="localhost")
-    parser.add_argument("-p", "--port", type=int, help="The UDP host port", default="1565")
-    args = parser.parse_args()
-
-    convert(args.ip, args.port)
+        s.sendto(frame, (args.ip, args.port))
 
 if __name__ == "__main__":
     main()
