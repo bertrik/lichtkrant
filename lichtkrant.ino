@@ -9,7 +9,6 @@
 #include <ESP8266mDNS.h>
 #include <WiFiManager.h>
 #include <Arduino.h>
-#include <NTPClient.h>
 #include <WiFiUdp.h>
 
 #define print Serial.printf
@@ -17,13 +16,7 @@
 #define RAWRGB_TCP_PORT    1234
 #define RGB565_UDP_PORT    1565
 
-const char* NTP_SERVER = "nl.pool.ntp.org";
-// enter your time zone (https://remotemonitoringsystems.ca/time-zone-abbreviations.php)
-const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";    // Europe/Amsterdam
-
 static WiFiManager wifiManager;
-static WiFiUDP ntpUDP;
-static NTPClient ntpClient(ntpUDP, NTP_SERVER);
 static WiFiServer tcpServer(RAWRGB_TCP_PORT);
 static WiFiUDP udpServer;
 static pixel_t tcpframe[8][80];
@@ -218,32 +211,6 @@ static int do_scroll(int argc, char *argv[])
     return CMD_OK;
 }
 
-static int do_datetime(int argc, char *argv[])
-{
-    time_t now = ntpClient.getEpochTime();
-    tm *timeinfo = localtime(&now);
-
-    char text[32];
-    int x;
-    pixel_t color;
-    const char *cmd = argv[0];
-    if (strcmp(cmd, "date") == 0) {
-        strftime(text, sizeof(text), "%a %F", timeinfo);
-        x = 0;
-        color = {255, 0};
-    } else if (strcmp(cmd, "time") == 0) {
-        strftime(text, sizeof(text), "%T", timeinfo);
-        x = 20;
-        color = {0, 255};
-    } else {
-        return CMD_ARG;
-    }
-
-    memset(framebuffer, 0, sizeof(framebuffer));
-    draw_text(text, x, color, {0, 0});
-    return CMD_OK;
-}
-
 static int do_enable(int argc, char *argv[])
 {
     bool enable = true;
@@ -286,8 +253,6 @@ const cmd_t commands[] = {
     { "pix", do_pix, "<col> <row> <hexcode> Set pixel with colour" },
     { "text", do_text, "<text> Write text on the display" },
     { "scroll", do_scroll, "<text> Scroll text on the display" },
-    { "date", do_datetime, "show date" },
-    { "time", do_datetime, "show time" },
     { "enable", do_enable, "[0|1] Enable/disable" },
     { "reboot", do_reboot, "Reboot" },
     { "hang", do_hang, "Hang (triggering a watchdog reset)" },
@@ -345,14 +310,11 @@ void setup(void)
     draw_text_ext(WiFi.localIP().toString().c_str(), 0, shade_rasta_vertical, {0, 0});
 
     tcpServer.begin();
+    udpServer.begin(RGB565_UDP_PORT);
     MDNS.begin("esp-ledsign");
     MDNS.addService("raw_rgb", "tcp", RAWRGB_TCP_PORT);
     MDNS.addService("rgb565", "udp", RGB565_UDP_PORT);
 
-    setenv("TZ", TZ_INFO, 1);
-    ntpClient.begin();
-
-    udpServer.begin(RGB565_UDP_PORT);
     led_enable();
 }
 
@@ -437,9 +399,6 @@ void loop(void)
             scroll_pos--;
         }
     }
-
-    // NTP update
-    ntpClient.update();
 
     // mDNS update
     MDNS.update();
