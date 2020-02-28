@@ -13,13 +13,10 @@
 
 #define print Serial.printf
 
-#define RAWRGB_TCP_PORT    1234
 #define RGB565_UDP_PORT    1565
 
 static WiFiManager wifiManager;
-static WiFiServer tcpServer(RAWRGB_TCP_PORT);
 static WiFiUDP udpServer;
-static pixel_t tcpframe[8][80];
 static uint8_t udpframe[8 * 80 * 2];
 
 static char editline[120];
@@ -273,20 +270,6 @@ static int do_help(int argc, char *argv[])
     return CMD_OK;
 }
 
-// reads one raw RGB frame from TCP client into the frame buffer, returns true if successful
-static bool read_tcp_frame(WiFiClient *client, uint8_t *buf, int size)
-{
-    uint8_t *ptr = buf;
-    int remain = size;
-    while (client->connected() && (remain > 0)) {
-        int len = client->read(ptr, remain);
-        remain -= len;
-        ptr += len;
-        yield();
-    }
-    return (remain == 0);
-}
-
 // vsync callback
 static void ICACHE_RAM_ATTR vsync(int frame_nr)
 {
@@ -309,10 +292,8 @@ void setup(void)
     wifiManager.autoConnect("ESP-LEDSIGN");
     draw_text_ext(WiFi.localIP().toString().c_str(), 0, shade_rasta_vertical, {0, 0});
 
-    tcpServer.begin();
     udpServer.begin(RGB565_UDP_PORT);
     MDNS.begin("esp-ledsign");
-    MDNS.addService("raw_rgb", "tcp", RAWRGB_TCP_PORT);
     MDNS.addService("rgb565", "udp", RGB565_UDP_PORT);
 
     led_enable();
@@ -320,23 +301,6 @@ void setup(void)
 
 void loop(void)
 {
-    // handle incoming TCP frames
-    WiFiClient client = tcpServer.available();
-    if (client) {
-        print("Accepted TCP connection from %s...", client.remoteIP().toString().c_str());
-        int frames = 0;
-        unsigned long int start = millis();
-        while (read_tcp_frame(&client, (uint8_t *)tcpframe, sizeof(tcpframe))) {
-            // copy first 7 lines
-            memcpy(framebuffer, tcpframe, sizeof(framebuffer));
-            frames++;
-        }
-        unsigned long int duration_ms = millis() - start;
-        int fps = 1000 * frames / duration_ms;
-        client.stop();
-        print("closed, %d frames/%lu ms = %d fps\n", frames, duration_ms, fps);
-    }
-
     // handle incoming UDP frame
     int udpSize = udpServer.parsePacket();
     if (udpSize > 0) {
