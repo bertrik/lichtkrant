@@ -31,13 +31,18 @@ static void convert_frame(char *buffer)
     }
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
     int sockfd, n;
     struct sockaddr_in servaddr;
 
+    const char *ip_addr = IP_ADDR;
+    if (argc > 1) {
+        ip_addr = argv[1];
+    }
+
     bzero(&servaddr, sizeof(servaddr));
-    servaddr.sin_addr.s_addr = inet_addr(IP_ADDR);
+    servaddr.sin_addr.s_addr = inet_addr(ip_addr);
     servaddr.sin_port = htons(PORT);
     servaddr.sin_family = AF_INET;
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
