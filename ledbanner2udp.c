@@ -7,7 +7,7 @@
 #include <strings.h>
 #include <arpa/inet.h>
 
-uint16_t rgb888_to_rgb565(char *rgb)
+static uint16_t rgb888_to_rgb565(const char *rgb)
 {
     uint8_t r = rgb[0];
     uint8_t g = rgb[1];
@@ -21,7 +21,7 @@ uint16_t rgb888_to_rgb565(char *rgb)
 #define IP_ADDR "10.42.43.53"
 
 // overwrite input buffer
-void convert_frame(char *buffer)
+static void convert_frame(char *buffer)
 {
     for (int n = 0; n < NUM_PIXELS; ++n) {
         char *in_data = &buffer[n * 3];
@@ -31,7 +31,7 @@ void convert_frame(char *buffer)
     }
 }
 
-int main()
+int main(void)
 {
     int sockfd, n;
     struct sockaddr_in servaddr;
@@ -51,4 +51,5 @@ int main()
         convert_frame(buffer);
         sendto(sockfd, buffer, NUM_PIXELS * 2, 0, NULL, NULL);
     }
+    return 0;
 }
