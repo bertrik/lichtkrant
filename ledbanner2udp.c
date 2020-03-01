@@ -33,7 +33,7 @@ static void convert_frame(char *buffer)
 
 int main(int argc, char *argv[])
 {
-    int sockfd, n;
+    int sockfd;
     struct sockaddr_in servaddr;
 
     const char *ip_addr = IP_ADDR;
