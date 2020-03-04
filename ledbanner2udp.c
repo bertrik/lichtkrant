@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
         write(STDOUT_FILENO, buffer, sizeof(buffer));
 
         convert_frame(buffer);
-        sendto(sockfd, buffer, NUM_PIXELS * 2, 0, NULL, 0);
+        send(sockfd, buffer, NUM_PIXELS * 2, 0);
     }
     return 0;
 }
