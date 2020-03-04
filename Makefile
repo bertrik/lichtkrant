@@ -1,6 +1,7 @@
-ledbanner2udp: ledbanner2udp.c
-	gcc -std=gnu99 -W -Wall -O ledbanner2udp.c -o ledbanner2udp
-	
+CFLAGS = -std=gnu99 -W -Wall -O
+
+all: ledbanner2udp
+
 clean:
-	rm ledbanner2udp
+	rm -f ledbanner2udp
 
