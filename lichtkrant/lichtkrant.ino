@@ -19,6 +19,7 @@ static WiFiManager wifiManager;
 static WiFiUDP udpServer;
 static uint8_t udpframe[8 * 80 * 2];
 
+static char esp_id[64];
 static char editline[120];
 static char textline[120];
 static pixel_t framebuffer[LED_HEIGHT][LED_WIDTH];
@@ -281,19 +282,21 @@ void setup(void)
 {
     led_init(vsync);
 
+    // get ESP id
+    snprintf(esp_id, sizeof(esp_id), "esp-ledsign-%06x", ESP.getChipId());
     Serial.begin(115200);
-    print("\nESP-lichtkrant\n");
+    print("\n%s\n", esp_id);
 
     EditInit(editline, sizeof(editline));
     draw_init((pixel_t *)framebuffer);
 
     memset(framebuffer, 0, sizeof(framebuffer));
 
-    wifiManager.autoConnect("ESP-LEDSIGN");
+    wifiManager.autoConnect(esp_id);
     draw_text_ext(WiFi.localIP().toString().c_str(), 0, shade_rasta_vertical, {0, 0});
 
     udpServer.begin(RGB565_UDP_PORT);
-    MDNS.begin("esp-ledsign");
+    MDNS.begin(esp_id);
     MDNS.addService("rgb565", "udp", RGB565_UDP_PORT);
 
     led_enable();
