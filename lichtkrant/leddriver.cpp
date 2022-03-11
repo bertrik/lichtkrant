@@ -28,7 +28,7 @@ static int frame = 0;
 #define FAST_GPIO_WRITE(pin,val) if (val) GPOS = 1<<(pin); else GPOC = 1<<(pin)
 
 // "horizontal" interrupt routine, displays one line
-static void ICACHE_RAM_ATTR led_hsync(void)
+static void IRAM_ATTR led_hsync(void)
 {
     // deactivate rows while updating column data and row multiplexer
     FAST_GPIO_WRITE(PIN_ENABLE, 0);
