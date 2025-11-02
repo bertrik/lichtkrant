@@ -13,7 +13,9 @@
 
 #define print Serial.printf
 
-#define RGB565_UDP_PORT    1565
+// Multicast group and port
+const IPAddress multicastIP(239, 0, 0, 1);
+const uint16_t RGB565_UDP_PORT = 1565;
 
 static WiFiManager wifiManager;
 static WiFiUDP udpServer;
@@ -295,7 +297,12 @@ void setup(void)
     wifiManager.autoConnect(esp_id);
     draw_text_ext(WiFi.localIP().toString().c_str(), 0, shade_rasta_vertical, {0, 0});
 
-    udpServer.begin(RGB565_UDP_PORT);
+    // multicast UDP
+    if (!udpServer.beginMulticast(WiFi.localIP(), multicastIP, RGB565_UDP_PORT)) {
+        print("Failed to join multicast group, starting unicast receiver ...\n");
+        udpServer.begin(RGB565_UDP_PORT);
+    }
+
     MDNS.begin(esp_id);
     MDNS.addService("rgb565", "udp", RGB565_UDP_PORT);
 
