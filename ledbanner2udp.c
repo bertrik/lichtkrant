@@ -69,9 +69,6 @@ int main(int argc, char *argv[])
         if (setsockopt(sockfd, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof(ttl)) < 0) {
             perror("setsockopt(IP_MULTICAST_TTL)");
         }
-        printf("→ Sending MULTICAST to %s:%d\n", ip_addr, PORT);
-    } else {
-        printf("→ Sending UNICAST to %s:%d\n", ip_addr, PORT);
     }
 
     // Main loop
